@@ -2,7 +2,7 @@
 
 
 class CellMap {
-	public view:HTMLDivElement;
+	view:HTMLDivElement;
 	constructor() {
 		this.createView();
 	}
@@ -15,8 +15,8 @@ class CellMap {
 };
 
 class GridMap {
-	public view:HTMLDivElement;
-	public cellMaps:CellMap[][];
+	view:HTMLDivElement;
+	cellMaps:CellMap[][];
 	constructor(public width, public height) {
 		var cells:CellMap[][] = [];
 		for (var i = 0; i < this.width; ++i) {
@@ -47,31 +47,10 @@ class GridMap {
 	}  
 };
 
-
-class Promise {
-	private callback: () => void;
-	private finish:boolean = false;
-	constructor(){}
-	public then(callback: () => void) {
-		this.callback = callback;
-		if (this.finish) {
-			this.done();
-		}
-	}
-	public done() {
-		this.finish = true;
-		if (typeof(this.callback) == "function") {
-			console.log("done callback");
-			this.callback();
-		}
-	}
-};
-
-
 class Robot {
 	private _x:number;
 	private _y:number;
-	public view:HTMLDivElement;
+	view:HTMLDivElement;
 	constructor() {
 		this.createView();
 		this.x = 0;
@@ -82,18 +61,18 @@ class Robot {
 		div.className = "robot";
 		this.view = div;
 	}
-	public set x(value:number) {
+	set x(value:number) {
 		this._x = value;
 		this.view.style.left = value * 60 + "px";
 	}
-	public get x() {
+	get x() {
 		return this._x;
 	}
-	public set y(value:number) {
+	set y(value:number) {
 		this._y = value;
 		this.view.style.top = value * 60 + "px";
 	}
-	public get y() {
+	get y() {
 		return this._y;
 	}
 
@@ -104,33 +83,39 @@ class World {
 	constructor(public robot:Robot, public grid:GridMap){}
 };
 
+class Action {
+	constructor(public world:World, public name:string, public act:(callback:()=>void)=>void){}
+};
+
 class Script {
-	public actions:any[] = [];
-	public currentIndex:number = 0;
-	public isPaused:boolean = true;
+	actions:Action[] = [];
+	currentIndex:number = 0;
+	isPaused:boolean = true;
 	constructor(public world:World) {}
-	public add(action: () => void) {
+	add(action:Action) {
 		this.actions.push(action);
 		return this;
 	}
-	public play() {
+	play() {
 		this.isPaused = false;
 		this.next();
 		return this;
 	}
-	public pause() {
+	pause() {
 		this.isPaused = true;
 		return this;
 	}
-	public stop() {
+	stop() {
 		this.currentIndex = 0;
 		return this.pause();
 	}
+	private bindNext = this.next.bind(this);
+
 	private next() {
 		if (!this.isPaused) {
 			if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
-				var action:()=>void = this.actions[this.currentIndex];
-				action.apply(this);
+				var action = this.actions[this.currentIndex];
+				action.act(this.bindNext);
 				this.currentIndex = (this.currentIndex + 1) % this.actions.length;
 				if (this.currentIndex == 0) {
 					this.pause();
@@ -140,22 +125,6 @@ class Script {
 		}
 	}
 
-	public up() {
-		var robot = this.world.robot;
-		createjs.Tween.get(robot).to({y:robot.y-1}, 1000).call(this.next, null, this);
-	}
-	public down() {
-		var robot = this.world.robot;
-		createjs.Tween.get(robot).to({y:robot.y+1}, 1000).call(this.next, null, this);
-	}
-	public right() {
-		var robot = this.world.robot;
-		createjs.Tween.get(robot).to({x:robot.x+1}, 1000).call(this.next, null, this);
-	}
-	public left() {
-		var robot = this.world.robot;
-		createjs.Tween.get(robot).to({x:robot.x-1}, 1000).call(this.next, null, this);
-	}
 };
 
 
@@ -165,7 +134,26 @@ gridMap.view.appendChild(robot.view);
 var world = new World(robot, gridMap);
 var script = new Script(world);
 
+var up = new Action(world, "up", (callback:()=>void) => {
+		var robot = this.world.robot;	
+		createjs.Tween.get(robot).to({y:robot.y-1}, 1000).call(callback);
+	});
+
+var down = new Action(world, "down", (callback:()=>void) => {
+		var robot = this.world.robot;	
+		createjs.Tween.get(robot).to({y:robot.y+1}, 1000).call(callback);
+	});
+
+var left = new Action(world, "left", (callback:()=>void) => {
+		var robot = this.world.robot;	
+		createjs.Tween.get(robot).to({x:robot.x-1}, 1000).call(callback);
+	});
+
+var right = new Action(world, "right", (callback:()=>void) => {
+		var robot = this.world.robot;	
+		createjs.Tween.get(robot).to({x:robot.x+1}, 1000).call(callback);
+	});
 
 document.body.appendChild(gridMap.view);
 
-script.add(script.down).add(script.right).add(script.right).add(script.up).add(script.left).play();
+script.add(down).add(right).add(right).add(up).add(left).play();

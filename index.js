@@ -1,4 +1,5 @@
 /// <reference path="lib/tweenjs.d.ts" />
+var _this = this;
 var CellMap = (function () {
     function CellMap() {
         this.createView();
@@ -44,27 +45,6 @@ var GridMap = (function () {
         this.view = div;
     };
     return GridMap;
-})();
-;
-
-var Promise = (function () {
-    function Promise() {
-        this.finish = false;
-    }
-    Promise.prototype.then = function (callback) {
-        this.callback = callback;
-        if (this.finish) {
-            this.done();
-        }
-    };
-    Promise.prototype.done = function () {
-        this.finish = true;
-        if (typeof (this.callback) == "function") {
-            console.log("done callback");
-            this.callback();
-        }
-    };
-    return Promise;
 })();
 ;
 
@@ -114,12 +94,23 @@ var World = (function () {
 })();
 ;
 
+var Action = (function () {
+    function Action(world, name, act) {
+        this.world = world;
+        this.name = name;
+        this.act = act;
+    }
+    return Action;
+})();
+;
+
 var Script = (function () {
     function Script(world) {
         this.world = world;
         this.actions = [];
         this.currentIndex = 0;
         this.isPaused = true;
+        this.bindNext = this.next.bind(this);
     }
     Script.prototype.add = function (action) {
         this.actions.push(action);
@@ -138,34 +129,18 @@ var Script = (function () {
         this.currentIndex = 0;
         return this.pause();
     };
+
     Script.prototype.next = function () {
         if (!this.isPaused) {
             if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
                 var action = this.actions[this.currentIndex];
-                action.apply(this);
+                action.act(this.bindNext);
                 this.currentIndex = (this.currentIndex + 1) % this.actions.length;
                 if (this.currentIndex == 0) {
                     this.pause();
                 }
             }
         }
-    };
-
-    Script.prototype.up = function () {
-        var robot = this.world.robot;
-        createjs.Tween.get(robot).to({ y: robot.y - 1 }, 1000).call(this.next, null, this);
-    };
-    Script.prototype.down = function () {
-        var robot = this.world.robot;
-        createjs.Tween.get(robot).to({ y: robot.y + 1 }, 1000).call(this.next, null, this);
-    };
-    Script.prototype.right = function () {
-        var robot = this.world.robot;
-        createjs.Tween.get(robot).to({ x: robot.x + 1 }, 1000).call(this.next, null, this);
-    };
-    Script.prototype.left = function () {
-        var robot = this.world.robot;
-        createjs.Tween.get(robot).to({ x: robot.x - 1 }, 1000).call(this.next, null, this);
     };
     return Script;
 })();
@@ -177,6 +152,26 @@ gridMap.view.appendChild(robot.view);
 var world = new World(robot, gridMap);
 var script = new Script(world);
 
+var up = new Action(world, "up", function (callback) {
+    var robot = _this.world.robot;
+    createjs.Tween.get(robot).to({ y: robot.y - 1 }, 1000).call(callback);
+});
+
+var down = new Action(world, "down", function (callback) {
+    var robot = _this.world.robot;
+    createjs.Tween.get(robot).to({ y: robot.y + 1 }, 1000).call(callback);
+});
+
+var left = new Action(world, "left", function (callback) {
+    var robot = _this.world.robot;
+    createjs.Tween.get(robot).to({ x: robot.x - 1 }, 1000).call(callback);
+});
+
+var right = new Action(world, "right", function (callback) {
+    var robot = _this.world.robot;
+    createjs.Tween.get(robot).to({ x: robot.x + 1 }, 1000).call(callback);
+});
+
 document.body.appendChild(gridMap.view);
 
-script.add(script.down).add(script.right).add(script.right).add(script.up).add(script.left).play();
+script.add(down).add(right).add(right).add(up).add(left).play();
