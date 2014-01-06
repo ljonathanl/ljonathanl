@@ -84,7 +84,7 @@ class World {
 };
 
 class Action {
-	constructor(public world:World, public name:string, public act:(callback:()=>void)=>void){}
+	constructor(public name:string, public act:(world:World, callback:()=>void)=>void){}
 };
 
 class Script {
@@ -115,7 +115,7 @@ class Script {
 		if (!this.isPaused) {
 			if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
 				var action = this.actions[this.currentIndex];
-				action.act(this.bindNext);
+				action.act(this.world, this.bindNext);
 				this.currentIndex = (this.currentIndex + 1) % this.actions.length;
 				if (this.currentIndex == 0) {
 					this.pause();
@@ -134,23 +134,23 @@ gridMap.view.appendChild(robot.view);
 var world = new World(robot, gridMap);
 var script = new Script(world);
 
-var up = new Action(world, "up", (callback:()=>void) => {
-		var robot = this.world.robot;	
+var up = new Action("up", (world, callback:()=>void) => {
+		var robot = world.robot;	
 		createjs.Tween.get(robot).to({y:robot.y-1}, 1000).call(callback);
 	});
 
-var down = new Action(world, "down", (callback:()=>void) => {
-		var robot = this.world.robot;	
+var down = new Action("down", (world, callback:()=>void) => {
+		var robot = world.robot;	
 		createjs.Tween.get(robot).to({y:robot.y+1}, 1000).call(callback);
 	});
 
-var left = new Action(world, "left", (callback:()=>void) => {
-		var robot = this.world.robot;	
+var left = new Action("left", (world, callback:()=>void) => {
+		var robot = world.robot;	
 		createjs.Tween.get(robot).to({x:robot.x-1}, 1000).call(callback);
 	});
 
-var right = new Action(world, "right", (callback:()=>void) => {
-		var robot = this.world.robot;	
+var right = new Action("right", (world, callback:()=>void) => {
+		var robot = world.robot;	
 		createjs.Tween.get(robot).to({x:robot.x+1}, 1000).call(callback);
 	});
 

@@ -1,5 +1,4 @@
 /// <reference path="lib/tweenjs.d.ts" />
-var _this = this;
 var CellMap = (function () {
     function CellMap() {
         this.createView();
@@ -95,8 +94,7 @@ var World = (function () {
 ;
 
 var Action = (function () {
-    function Action(world, name, act) {
-        this.world = world;
+    function Action(name, act) {
         this.name = name;
         this.act = act;
     }
@@ -134,7 +132,7 @@ var Script = (function () {
         if (!this.isPaused) {
             if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
                 var action = this.actions[this.currentIndex];
-                action.act(this.bindNext);
+                action.act(this.world, this.bindNext);
                 this.currentIndex = (this.currentIndex + 1) % this.actions.length;
                 if (this.currentIndex == 0) {
                     this.pause();
@@ -152,23 +150,23 @@ gridMap.view.appendChild(robot.view);
 var world = new World(robot, gridMap);
 var script = new Script(world);
 
-var up = new Action(world, "up", function (callback) {
-    var robot = _this.world.robot;
+var up = new Action("up", function (world, callback) {
+    var robot = world.robot;
     createjs.Tween.get(robot).to({ y: robot.y - 1 }, 1000).call(callback);
 });
 
-var down = new Action(world, "down", function (callback) {
-    var robot = _this.world.robot;
+var down = new Action("down", function (world, callback) {
+    var robot = world.robot;
     createjs.Tween.get(robot).to({ y: robot.y + 1 }, 1000).call(callback);
 });
 
-var left = new Action(world, "left", function (callback) {
-    var robot = _this.world.robot;
+var left = new Action("left", function (world, callback) {
+    var robot = world.robot;
     createjs.Tween.get(robot).to({ x: robot.x - 1 }, 1000).call(callback);
 });
 
-var right = new Action(world, "right", function (callback) {
-    var robot = _this.world.robot;
+var right = new Action("right", function (world, callback) {
+    var robot = world.robot;
     createjs.Tween.get(robot).to({ x: robot.x + 1 }, 1000).call(callback);
 });
 
