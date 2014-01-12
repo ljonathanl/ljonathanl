@@ -52,6 +52,7 @@ var Robot = (function () {
         this.createView();
         this.x = 0;
         this.y = 0;
+        this.angle = 0;
     }
     Robot.prototype.createView = function () {
         var div = document.createElement("div");
@@ -76,6 +77,17 @@ var Robot = (function () {
         set: function (value) {
             this._y = value;
             this.view.style.top = value * 60 + "px";
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Robot.prototype, "angle", {
+        get: function () {
+            return this._angle;
+        },
+        set: function (value) {
+            this._angle = value;
+            this.view.style["webkitTransform"] = "rotate(" + value + "deg)";
         },
         enumerable: true,
         configurable: true
@@ -109,9 +121,48 @@ var Script = (function () {
         this.currentIndex = 0;
         this.isPaused = true;
         this.bindNext = this.next.bind(this);
+        this.createView();
     }
+    Script.prototype.createView = function () {
+        var _this = this;
+        var div = document.createElement("div");
+        div.className = "script";
+        this.view = div;
+        var control = document.createElement("div");
+        control.className = "control";
+        div.appendChild(control);
+        var actions = document.createElement("div");
+        actions.className = "actions";
+        div.appendChild(actions);
+        this.actionsView = actions;
+        var playButton = document.createElement("button");
+        playButton.textContent = "play";
+        playButton.onclick = function () {
+            _this.play();
+        };
+        control.appendChild(playButton);
+        var pauseButton = document.createElement("button");
+        pauseButton.textContent = "pause";
+        pauseButton.onclick = function () {
+            _this.pause();
+        };
+        control.appendChild(pauseButton);
+        var stopButton = document.createElement("button");
+        stopButton.textContent = "stop";
+        stopButton.onclick = function () {
+            _this.stop();
+        };
+        control.appendChild(stopButton);
+    };
+    Script.prototype.addActionView = function (action) {
+        var button = document.createElement("button");
+        button.textContent = action.name;
+        button.className = "action " + action.name;
+        this.actionsView.appendChild(button);
+    };
     Script.prototype.add = function (action) {
         this.actions.push(action);
+        this.addActionView(action);
         return this;
     };
     Script.prototype.play = function () {
@@ -144,32 +195,99 @@ var Script = (function () {
 })();
 ;
 
-var gridMap = new GridMap(6, 6);
+var AvailableActions = (function () {
+    function AvailableActions(script) {
+        this.script = script;
+        this.actionsMap = {};
+        this.actions = [];
+        this.createView();
+    }
+    AvailableActions.prototype.add = function (action) {
+        this.actionsMap[action.name] = action;
+        this.actions.push(action);
+        this.addActionView(action);
+        return this;
+    };
+    AvailableActions.prototype.createView = function () {
+        var div = document.createElement("div");
+        div.className = "availableActions";
+        this.view = div;
+    };
+    AvailableActions.prototype.addActionView = function (action) {
+        var _this = this;
+        var button = document.createElement("button");
+        button.textContent = action.name;
+        button.className = "action " + action.name;
+        button.onclick = function () {
+            _this.script.add(action);
+        };
+        this.view.appendChild(button);
+    };
+    return AvailableActions;
+})();
+;
+
+var gridMap = new GridMap(10, 10);
 var robot = new Robot();
 gridMap.view.appendChild(robot.view);
 var world = new World(robot, gridMap);
 var script = new Script(world);
+var availableActions = new AvailableActions(script);
+
+var rotate = function (robot, angle, callback) {
+    if (robot.angle == angle) {
+        callback();
+    } else {
+        createjs.Tween.get(robot).to({ angle: angle }, 500).call(callback);
+    }
+};
 
 var up = new Action("up", function (world, callback) {
     var robot = world.robot;
-    createjs.Tween.get(robot).to({ y: robot.y - 1 }, 1000).call(callback);
+    rotate(robot, -90, function () {
+        if (robot.y == 0) {
+            createjs.Tween.get(robot).to({ y: -0.2 }, 300).to({ y: 0 }, 300).call(callback);
+        } else {
+            createjs.Tween.get(robot).to({ y: robot.y - 1 }, 1000).call(callback);
+        }
+    });
 });
 
 var down = new Action("down", function (world, callback) {
     var robot = world.robot;
-    createjs.Tween.get(robot).to({ y: robot.y + 1 }, 1000).call(callback);
+    rotate(robot, 90, function () {
+        if (robot.y >= world.grid.height - 1) {
+            createjs.Tween.get(robot).to({ y: robot.y + 0.2 }, 300).to({ y: robot.y }, 300).call(callback);
+        } else {
+            createjs.Tween.get(robot).to({ y: robot.y + 1 }, 1000).call(callback);
+        }
+    });
 });
 
 var left = new Action("left", function (world, callback) {
     var robot = world.robot;
-    createjs.Tween.get(robot).to({ x: robot.x - 1 }, 1000).call(callback);
+    rotate(robot, 180, function () {
+        if (robot.x == 0) {
+            createjs.Tween.get(robot).to({ x: -0.2 }, 300).to({ x: 0 }, 300).call(callback);
+        } else {
+            createjs.Tween.get(robot).to({ x: robot.x - 1 }, 1000).call(callback);
+        }
+    });
 });
 
 var right = new Action("right", function (world, callback) {
     var robot = world.robot;
-    createjs.Tween.get(robot).to({ x: robot.x + 1 }, 1000).call(callback);
+    rotate(robot, 0, function () {
+        if (robot.x >= world.grid.width - 1) {
+            createjs.Tween.get(robot).to({ x: robot.x + 0.2 }, 300).to({ x: robot.x }, 300).call(callback);
+        } else {
+            createjs.Tween.get(robot).to({ x: robot.x + 1 }, 1000).call(callback);
+        }
+    });
 });
 
-document.body.appendChild(gridMap.view);
+availableActions.add(up).add(down).add(left).add(right);
 
-script.add(down).add(right).add(right).add(up).add(left).play();
+document.body.appendChild(availableActions.view);
+document.body.appendChild(script.view);
+document.body.appendChild(gridMap.view);

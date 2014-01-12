@@ -50,11 +50,13 @@ class GridMap {
 class Robot {
 	private _x:number;
 	private _y:number;
+	private _angle:number;
 	view:HTMLDivElement;
 	constructor() {
 		this.createView();
 		this.x = 0;
 		this.y = 0;
+		this.angle = 0;
 	}
 	private createView() {
 		var div = document.createElement("div");
@@ -75,7 +77,13 @@ class Robot {
 	get y() {
 		return this._y;
 	}
-
+	set angle(value:number) {
+		this._angle = value;
+		this.view.style["webkitTransform"] = "rotate(" + value + "deg)";
+	}
+	get angle() {
+		return this._angle;
+	}
 	
 };
 
@@ -91,9 +99,50 @@ class Script {
 	actions:Action[] = [];
 	currentIndex:number = 0;
 	isPaused:boolean = true;
-	constructor(public world:World) {}
+	view: HTMLDivElement;
+	actionsView: HTMLDivElement;
+	constructor(public world:World) {
+		this.createView();
+	}
+	private createView() {
+		var div:HTMLDivElement = document.createElement("div");
+		div.className = "script";
+		this.view = div;
+		var control:HTMLDivElement = document.createElement("div");
+		control.className = "control";
+		div.appendChild(control);
+		var actions:HTMLDivElement = document.createElement("div");
+		actions.className = "actions";
+		div.appendChild(actions);
+		this.actionsView = actions;
+		var playButton:HTMLButtonElement = document.createElement("button");
+		playButton.textContent = "play";
+		playButton.onclick = () => {
+			this.play();
+		};
+		control.appendChild(playButton);
+		var pauseButton:HTMLButtonElement = document.createElement("button");
+		pauseButton.textContent = "pause";
+		pauseButton.onclick = () => {
+			this.pause();
+		};
+		control.appendChild(pauseButton);
+		var stopButton:HTMLButtonElement = document.createElement("button");
+		stopButton.textContent = "stop";
+		stopButton.onclick = () => {
+			this.stop();
+		};
+		control.appendChild(stopButton);	
+	}
+	private addActionView(action:Action) {
+		var button:HTMLButtonElement = document.createElement("button");
+		button.textContent = action.name;
+		button.className = "action " + action.name;
+		this.actionsView.appendChild(button);
+	}
 	add(action:Action) {
 		this.actions.push(action);
+		this.addActionView(action);
 		return this;
 	}
 	play() {
@@ -124,36 +173,99 @@ class Script {
 
 		}
 	}
+};
 
+class AvailableActions {
+	actionsMap: {[key:string]:Action} = {};
+	actions: Action[] = [];
+	view:HTMLDivElement;
+	constructor(public script:Script) {
+		this.createView();
+	}
+	add(action:Action) {
+		this.actionsMap[action.name] = action;
+		this.actions.push(action);
+		this.addActionView(action);
+		return this;
+	}
+	private createView() {
+		var div = document.createElement("div");
+		div.className = "availableActions";
+		this.view = div;
+	}
+	private addActionView(action:Action) {
+		var button:HTMLButtonElement = document.createElement("button");
+		button.textContent = action.name;
+		button.className = "action " + action.name;
+		button.onclick = () => {
+			this.script.add(action);
+		};
+		this.view.appendChild(button);
+	}
 };
 
 
-var gridMap = new GridMap(6,6);
+var gridMap = new GridMap(10,10);
 var robot = new Robot();
 gridMap.view.appendChild(robot.view);
 var world = new World(robot, gridMap);
 var script = new Script(world);
+var availableActions = new AvailableActions(script);
+
+var rotate = (robot:Robot, angle:number, callback:()=>void):void => {
+	if (robot.angle == angle) {
+		callback();
+	} else {
+		createjs.Tween.get(robot).to({angle:angle},500).call(callback);
+	}
+};
 
 var up = new Action("up", (world, callback:()=>void) => {
-		var robot = world.robot;	
-		createjs.Tween.get(robot).to({y:robot.y-1}, 1000).call(callback);
+		var robot = world.robot;
+		rotate(robot, -90, () => {
+			if (robot.y == 0) {
+				createjs.Tween.get(robot).to({y:-0.2}, 300).to({y:0}, 300).call(callback);
+			} else {
+				createjs.Tween.get(robot).to({y:robot.y-1}, 1000).call(callback);
+			}
+		});	
 	});
 
 var down = new Action("down", (world, callback:()=>void) => {
-		var robot = world.robot;	
-		createjs.Tween.get(robot).to({y:robot.y+1}, 1000).call(callback);
+		var robot = world.robot;
+		rotate(robot, 90, () => {
+			if (robot.y >= world.grid.height - 1) {
+				createjs.Tween.get(robot).to({y:robot.y+0.2}, 300).to({y:robot.y}, 300).call(callback);
+			} else {	
+				createjs.Tween.get(robot).to({y:robot.y+1}, 1000).call(callback);
+			}
+		});
 	});
 
 var left = new Action("left", (world, callback:()=>void) => {
-		var robot = world.robot;	
-		createjs.Tween.get(robot).to({x:robot.x-1}, 1000).call(callback);
+		var robot = world.robot;
+		rotate(robot, 180, () => {
+			if (robot.x == 0) {
+				createjs.Tween.get(robot).to({x:-0.2}, 300).to({x:0}, 300).call(callback);
+			} else {	
+				createjs.Tween.get(robot).to({x:robot.x-1}, 1000).call(callback);
+			}
+		});
 	});
 
 var right = new Action("right", (world, callback:()=>void) => {
-		var robot = world.robot;	
-		createjs.Tween.get(robot).to({x:robot.x+1}, 1000).call(callback);
+		var robot = world.robot;
+		rotate(robot, 0, () => {
+			if (robot.x >= world.grid.width - 1) {
+				createjs.Tween.get(robot).to({x:robot.x+0.2}, 300).to({x:robot.x}, 300).call(callback);
+			} else {	
+				createjs.Tween.get(robot).to({x:robot.x+1}, 1000).call(callback);
+			}
+		});
 	});
 
-document.body.appendChild(gridMap.view);
+availableActions.add(up).add(down).add(left).add(right);
 
-script.add(down).add(right).add(right).add(up).add(left).play();
+document.body.appendChild(availableActions.view);
+document.body.appendChild(script.view);
+document.body.appendChild(gridMap.view);
