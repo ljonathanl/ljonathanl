@@ -129,30 +129,39 @@ var Script = (function () {
         div.className = "script";
         this.view = div;
         var control = document.createElement("div");
-        control.className = "control";
+        control.className = "controlBoard";
         div.appendChild(control);
         var actions = document.createElement("div");
         actions.className = "actions";
         div.appendChild(actions);
         this.actionsView = actions;
         var playButton = document.createElement("button");
-        playButton.textContent = "play";
+        playButton.className = "control play";
         playButton.onclick = function () {
             _this.play();
         };
         control.appendChild(playButton);
+        this.playButton = playButton;
         var pauseButton = document.createElement("button");
-        pauseButton.textContent = "pause";
+        pauseButton.className = "control pause";
         pauseButton.onclick = function () {
             _this.pause();
         };
         control.appendChild(pauseButton);
+        pauseButton.style.display = "none";
+        this.pauseButton = pauseButton;
         var stopButton = document.createElement("button");
-        stopButton.textContent = "stop";
+        stopButton.className = "control stop";
         stopButton.onclick = function () {
             _this.stop();
         };
         control.appendChild(stopButton);
+        var clearButton = document.createElement("button");
+        clearButton.className = "control clear";
+        clearButton.onclick = function () {
+            _this.clear();
+        };
+        control.appendChild(clearButton);
     };
     Script.prototype.addActionView = function (action) {
         var button = document.createElement("button");
@@ -166,21 +175,37 @@ var Script = (function () {
     };
     Script.prototype.play = function () {
         this.isPaused = false;
+        this.playButton.style.display = "none";
+        this.pauseButton.style.display = "inline";
         this.next();
         return this;
     };
     Script.prototype.pause = function () {
         this.isPaused = true;
+        this.playButton.style.display = "inline";
+        this.pauseButton.style.display = "none";
         return this;
     };
     Script.prototype.stop = function () {
         this.currentIndex = 0;
         return this.pause();
     };
+    Script.prototype.clear = function () {
+        this.actions.length = 0;
+        while (this.actionsView.lastChild) {
+            this.actionsView.removeChild(this.actionsView.lastChild);
+        }
+        return this.stop();
+    };
 
     Script.prototype.next = function () {
         if (!this.isPaused) {
             if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
+                var currentActionView = this.actionsView.querySelector(".executing");
+                if (currentActionView)
+                    currentActionView.classList.remove("executing");
+                currentActionView = this.actionsView.childNodes.item(this.currentIndex);
+                currentActionView.className += " executing";
                 var action = this.actions[this.currentIndex];
                 action.act(this.world, this.bindNext);
                 this.currentIndex = (this.currentIndex + 1) % this.actions.length;
@@ -233,9 +258,12 @@ var script = new Script(world);
 var availableActions = new AvailableActions(script);
 
 var rotate = function (robot, angle, callback) {
-    if (robot.angle == angle) {
+    if (robot.angle == angle || robot.angle == angle - 360) {
         callback();
     } else {
+        if (Math.abs(robot.angle - angle) > Math.abs(robot.angle - (angle - 360))) {
+            angle = angle - 360;
+        }
         createjs.Tween.get(robot).to({ angle: angle }, 500).call(callback);
     }
 };

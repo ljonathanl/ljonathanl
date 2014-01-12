@@ -101,6 +101,8 @@ class Script {
 	isPaused:boolean = true;
 	view: HTMLDivElement;
 	actionsView: HTMLDivElement;
+	playButton: HTMLButtonElement;
+	pauseButton: HTMLButtonElement;
 	constructor(public world:World) {
 		this.createView();
 	}
@@ -109,30 +111,39 @@ class Script {
 		div.className = "script";
 		this.view = div;
 		var control:HTMLDivElement = document.createElement("div");
-		control.className = "control";
+		control.className = "controlBoard";
 		div.appendChild(control);
 		var actions:HTMLDivElement = document.createElement("div");
 		actions.className = "actions";
 		div.appendChild(actions);
 		this.actionsView = actions;
 		var playButton:HTMLButtonElement = document.createElement("button");
-		playButton.textContent = "play";
+		playButton.className = "control play";
 		playButton.onclick = () => {
 			this.play();
 		};
 		control.appendChild(playButton);
+		this.playButton = playButton;
 		var pauseButton:HTMLButtonElement = document.createElement("button");
-		pauseButton.textContent = "pause";
+		pauseButton.className = "control pause";
 		pauseButton.onclick = () => {
 			this.pause();
 		};
 		control.appendChild(pauseButton);
+		pauseButton.style.display = "none";
+		this.pauseButton = pauseButton;
 		var stopButton:HTMLButtonElement = document.createElement("button");
-		stopButton.textContent = "stop";
+		stopButton.className = "control stop";
 		stopButton.onclick = () => {
 			this.stop();
 		};
 		control.appendChild(stopButton);	
+		var clearButton:HTMLButtonElement = document.createElement("button");
+		clearButton.className = "control clear";
+		clearButton.onclick = () => {
+			this.clear();
+		};
+		control.appendChild(clearButton);
 	}
 	private addActionView(action:Action) {
 		var button:HTMLButtonElement = document.createElement("button");
@@ -146,22 +157,37 @@ class Script {
 	}
 	play() {
 		this.isPaused = false;
+		this.playButton.style.display = "none";
+		this.pauseButton.style.display = "inline";
 		this.next();
 		return this;
 	}
 	pause() {
 		this.isPaused = true;
+		this.playButton.style.display = "inline";
+		this.pauseButton.style.display = "none";
 		return this;
 	}
 	stop() {
 		this.currentIndex = 0;
 		return this.pause();
 	}
+	clear() {
+		this.actions.length = 0;
+		while (this.actionsView.lastChild) {
+			this.actionsView.removeChild(this.actionsView.lastChild);
+		}
+		return this.stop();
+	}
 	private bindNext = this.next.bind(this);
 
 	private next() {
 		if (!this.isPaused) {
 			if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
+				var currentActionView = <HTMLButtonElement>this.actionsView.querySelector(".executing");
+				if (currentActionView) currentActionView.classList.remove("executing");
+				currentActionView = <HTMLButtonElement>this.actionsView.childNodes.item(this.currentIndex);
+				currentActionView.className += " executing"; 
 				var action = this.actions[this.currentIndex];
 				action.act(this.world, this.bindNext);
 				this.currentIndex = (this.currentIndex + 1) % this.actions.length;
@@ -211,9 +237,12 @@ var script = new Script(world);
 var availableActions = new AvailableActions(script);
 
 var rotate = (robot:Robot, angle:number, callback:()=>void):void => {
-	if (robot.angle == angle) {
+	if (robot.angle == angle || robot.angle == angle - 360) {
 		callback();
 	} else {
+		if (Math.abs(robot.angle - angle) > Math.abs(robot.angle - (angle - 360))) {
+			angle = angle - 360;
+		}
 		createjs.Tween.get(robot).to({angle:angle},500).call(callback);
 	}
 };
