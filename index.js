@@ -156,7 +156,6 @@ var Script = (function () {
     };
     Script.prototype.addActionView = function (action) {
         var button = document.createElement("button");
-        button.textContent = action.name;
         button.className = "action " + action.name;
         this.actionsView.appendChild(button);
     };
@@ -216,7 +215,6 @@ var AvailableActions = (function () {
     AvailableActions.prototype.addActionView = function (action) {
         var _this = this;
         var button = document.createElement("button");
-        button.textContent = action.name;
         button.className = "action " + action.name;
         button.onclick = function () {
             _this.script.add(action);
@@ -288,6 +286,9 @@ var right = new Action("right", function (world, callback) {
 
 availableActions.add(up).add(down).add(left).add(right);
 
-document.body.appendChild(availableActions.view);
-document.body.appendChild(script.view);
-document.body.appendChild(gridMap.view);
+var gridContainer = document.querySelector(".gridContainer");
+var scriptContainer = document.querySelector(".scriptContainer");
+
+gridContainer.appendChild(gridMap.view);
+scriptContainer.appendChild(availableActions.view);
+scriptContainer.appendChild(script.view);

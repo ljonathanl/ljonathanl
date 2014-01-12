@@ -136,7 +136,6 @@ class Script {
 	}
 	private addActionView(action:Action) {
 		var button:HTMLButtonElement = document.createElement("button");
-		button.textContent = action.name;
 		button.className = "action " + action.name;
 		this.actionsView.appendChild(button);
 	}
@@ -195,7 +194,6 @@ class AvailableActions {
 	}
 	private addActionView(action:Action) {
 		var button:HTMLButtonElement = document.createElement("button");
-		button.textContent = action.name;
 		button.className = "action " + action.name;
 		button.onclick = () => {
 			this.script.add(action);
@@ -266,6 +264,9 @@ var right = new Action("right", (world, callback:()=>void) => {
 
 availableActions.add(up).add(down).add(left).add(right);
 
-document.body.appendChild(availableActions.view);
-document.body.appendChild(script.view);
-document.body.appendChild(gridMap.view);
+var gridContainer = document.querySelector(".gridContainer");
+var scriptContainer = document.querySelector(".scriptContainer");
+
+gridContainer.appendChild(gridMap.view);
+scriptContainer.appendChild(availableActions.view);
+scriptContainer.appendChild(script.view);
