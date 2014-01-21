@@ -1,7 +1,7 @@
 /// <reference path="lib/tweenjs.d.ts" />
 
 
-class CellMap {
+class Cell {
 	view:HTMLDivElement;
 	constructor() {
 		this.createView();
@@ -11,22 +11,24 @@ class CellMap {
 		div.className = "cell";
 		this.view = div;
 	}
-
+	set color(value:string) {
+		this.view.style.backgroundColor = value;
+	}
 };
 
-class GridMap {
+class Grid {
 	view:HTMLDivElement;
-	cellMaps:CellMap[][];
+	cells:Cell[][];
 	constructor(public width, public height) {
-		var cells:CellMap[][] = [];
+		var cells:Cell[][] = [];
 		for (var i = 0; i < this.width; ++i) {
 			cells[i] = [];
 			for (var j = 0; j < this.height; ++j) {
-				var cellMap = new CellMap();
-				cells[i][j] = cellMap;
+				var cell = new Cell();
+				cells[i][j] = cell;
 			}
 		}		
-		this.cellMaps = cells;
+		this.cells = cells;
 		this.createView();
 	}
 	private createView() {
@@ -35,9 +37,9 @@ class GridMap {
 		for (var j = 0; j < this.height; ++j) {
 			var row = document.createElement("tr");
 			for (var i = 0; i < this.width; ++i) {
-				var cell = document.createElement("td");
-				cell.appendChild(this.cellMaps[j][i].view);
-				row.appendChild(cell);
+				var td = document.createElement("td");
+				td.appendChild(this.cells[i][j].view);
+				row.appendChild(td);
 			}
 			table.appendChild(row);		
 		}
@@ -88,7 +90,7 @@ class Robot {
 };
 
 class World {
-	constructor(public robot:Robot, public grid:GridMap){}
+	constructor(public robot:Robot, public grid:Grid){}
 };
 
 class Action {
@@ -189,11 +191,11 @@ class Script {
 				currentActionView = <HTMLButtonElement>this.actionsView.childNodes.item(this.currentIndex);
 				currentActionView.className += " executing"; 
 				var action = this.actions[this.currentIndex];
-				action.act(this.world, this.bindNext);
 				this.currentIndex = (this.currentIndex + 1) % this.actions.length;
 				if (this.currentIndex == 0) {
 					this.pause();
 				}
+				action.act(this.world, this.bindNext);
 			}
 
 		}
@@ -229,10 +231,10 @@ class AvailableActions {
 };
 
 
-var gridMap = new GridMap(10,10);
+var grid = new Grid(10,10);
 var robot = new Robot();
-gridMap.view.appendChild(robot.view);
-var world = new World(robot, gridMap);
+grid.view.appendChild(robot.view);
+var world = new World(robot, grid);
 var script = new Script(world);
 var availableActions = new AvailableActions(script);
 
@@ -291,11 +293,24 @@ var right = new Action("right", (world, callback:()=>void) => {
 		});
 	});
 
-availableActions.add(up).add(down).add(left).add(right);
+var color = function (color:string) {
+	return (world:World, callback:()=>void) => {
+		var robot = world.robot;
+		var grid = world.grid;
+		var cell = grid.cells[robot.x][robot.y];
+		cell.color = color;
+		callback();
+	}
+};
+
+var colorRed = new Action("colorRed", color("#FF0000"));
+var colorGreen = new Action("colorGreen", color("#00FF00"));
+
+availableActions.add(up).add(down).add(left).add(right).add(colorRed).add(colorGreen);
 
 var gridContainer = document.querySelector(".gridContainer");
 var scriptContainer = document.querySelector(".scriptContainer");
 
-gridContainer.appendChild(gridMap.view);
+gridContainer.appendChild(grid.view);
 scriptContainer.appendChild(availableActions.view);
 scriptContainer.appendChild(script.view);

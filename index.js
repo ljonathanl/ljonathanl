@@ -1,41 +1,48 @@
 /// <reference path="lib/tweenjs.d.ts" />
-var CellMap = (function () {
-    function CellMap() {
+var Cell = (function () {
+    function Cell() {
         this.createView();
     }
-    CellMap.prototype.createView = function () {
+    Cell.prototype.createView = function () {
         var div = document.createElement("div");
         div.className = "cell";
         this.view = div;
     };
-    return CellMap;
+    Object.defineProperty(Cell.prototype, "color", {
+        set: function (value) {
+            this.view.style.backgroundColor = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Cell;
 })();
 ;
 
-var GridMap = (function () {
-    function GridMap(width, height) {
+var Grid = (function () {
+    function Grid(width, height) {
         this.width = width;
         this.height = height;
         var cells = [];
         for (var i = 0; i < this.width; ++i) {
             cells[i] = [];
             for (var j = 0; j < this.height; ++j) {
-                var cellMap = new CellMap();
-                cells[i][j] = cellMap;
+                var cell = new Cell();
+                cells[i][j] = cell;
             }
         }
-        this.cellMaps = cells;
+        this.cells = cells;
         this.createView();
     }
-    GridMap.prototype.createView = function () {
+    Grid.prototype.createView = function () {
         var div = document.createElement("div");
         var table = document.createElement("table");
         for (var j = 0; j < this.height; ++j) {
             var row = document.createElement("tr");
             for (var i = 0; i < this.width; ++i) {
-                var cell = document.createElement("td");
-                cell.appendChild(this.cellMaps[j][i].view);
-                row.appendChild(cell);
+                var td = document.createElement("td");
+                td.appendChild(this.cells[i][j].view);
+                row.appendChild(td);
             }
             table.appendChild(row);
         }
@@ -43,7 +50,7 @@ var GridMap = (function () {
         div.className = "grid";
         this.view = div;
     };
-    return GridMap;
+    return Grid;
 })();
 ;
 
@@ -207,11 +214,11 @@ var Script = (function () {
                 currentActionView = this.actionsView.childNodes.item(this.currentIndex);
                 currentActionView.className += " executing";
                 var action = this.actions[this.currentIndex];
-                action.act(this.world, this.bindNext);
                 this.currentIndex = (this.currentIndex + 1) % this.actions.length;
                 if (this.currentIndex == 0) {
                     this.pause();
                 }
+                action.act(this.world, this.bindNext);
             }
         }
     };
@@ -250,10 +257,10 @@ var AvailableActions = (function () {
 })();
 ;
 
-var gridMap = new GridMap(10, 10);
+var grid = new Grid(10, 10);
 var robot = new Robot();
-gridMap.view.appendChild(robot.view);
-var world = new World(robot, gridMap);
+grid.view.appendChild(robot.view);
+var world = new World(robot, grid);
 var script = new Script(world);
 var availableActions = new AvailableActions(script);
 
@@ -312,11 +319,24 @@ var right = new Action("right", function (world, callback) {
     });
 });
 
-availableActions.add(up).add(down).add(left).add(right);
+var color = function (color) {
+    return function (world, callback) {
+        var robot = world.robot;
+        var grid = world.grid;
+        var cell = grid.cells[robot.x][robot.y];
+        cell.color = color;
+        callback();
+    };
+};
+
+var colorRed = new Action("colorRed", color("#FF0000"));
+var colorGreen = new Action("colorGreen", color("#00FF00"));
+
+availableActions.add(up).add(down).add(left).add(right).add(colorRed).add(colorGreen);
 
 var gridContainer = document.querySelector(".gridContainer");
 var scriptContainer = document.querySelector(".scriptContainer");
 
-gridContainer.appendChild(gridMap.view);
+gridContainer.appendChild(grid.view);
 scriptContainer.appendChild(availableActions.view);
 scriptContainer.appendChild(script.view);
