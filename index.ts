@@ -1,4 +1,5 @@
 /// <reference path="lib/tweenjs.d.ts" />
+/// <reference path="util.ts" />
 
 
 class Cell {
