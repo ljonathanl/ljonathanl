@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		li {
+			user-select: none;
+			width: 200px;
+			height: 20px;
+			display: block;
+			border: 1px solid #666;
+			background-color: #CCC;
+			margin: 5px;
+		}
+
+	</style>
+</head>
+<body>
+	<ul>
+		<li draggable="true">un</li>
+		<li draggable="true">deux</li>
+		<li draggable="true">trois</li>
+		<li draggable="true">quatre</li>
+	</ul>
+	<div id="drag">
+		pipo
+	</div>	
+</body>
+<script type="text/javascript">
+	var ul = document.querySelector("ul");
+
+	var placeHolder = document.createElement("li");
+
+	var dragSrcEl = null;
+	var status = "off";
+
+	function before(element, insert) {
+		if (element.parentNode) {
+            element.parentNode.insertBefore(insert, element);
+        }
+	}
+
+	function after(element, insert) {
+		if (element.parentNode) {
+            element.parentNode.insertBefore(insert, element.nextSibling);
+        }
+	}
+
+	function index(element) {
+		for (var k=0,e=element; e = e.previousElementSibling; ++k);
+		return k;
+	}
+
+
+	function handleDragStart(e) {
+		console.log("start");	
+		console.log(e);
+
+		dragSrcEl = e.target;
+		e.dataTransfer.effectAllowed = 'move';
+		//e.dataTransfer.setData('text/html', "<div>pipo</div>");
+		// e.dataTransfer.setDragImage(document.querySelector("#drag"),0,0);
+		// var div = document.createElement("div");
+		// div.innerHTML = "<div>pipo et molo</div>";
+		// e.dataTransfer.setDragImage(div,0,0);
+
+		// e.target.style.height = "0px";
+		status = "start";
+	}
+
+	function handleDragEnd(e) {
+		console.log("end");
+		dragSrcEl.style.display = "block";
+
+		status = "none";
+		before(placeHolder, dragSrcEl);
+		dragSrcEl = null;
+		ul.removeChild(placeHolder);
+	}
+
+	function handleDrop(e) {
+		console.log("drop");
+
+	}
+
+	function handleDragEnter(e) {
+		console.log("enter");
+		console.log(e);
+		if (status == "start") {
+			dragSrcEl.style.display = "none";
+			status = "enter";
+		}
+		var element = e.target;
+		if (element.parentNode == ul) {
+			var indexPlaceHolder = index(placeHolder);
+			var indexElement = index(element);
+			console.log("placeHolder: " + indexPlaceHolder + " element: " + indexElement);
+			if (indexPlaceHolder < indexElement) {
+				after(element, placeHolder);
+			} else {
+				before(element, placeHolder);
+			}
+		}
+	}
+
+	// [].forEach.call(lis, function(li) {
+	  ul.addEventListener('dragstart', handleDragStart, false);
+	  ul.addEventListener('dragenter', handleDragEnter, false);
+	  ul.addEventListener('drop', handleDrop, false);
+	  
+//	  li.addEventListener('dragover', handleDragOver, false);
+//	  li.addEventListener('dragleave', handleDragLeave, false);
+	  ul.addEventListener('dragend', handleDragEnd, false);
+	// });
+
+</script>
+</html>
