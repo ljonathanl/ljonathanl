@@ -33,6 +33,7 @@
 
 	var dragSrcEl = null;
 	var status = "off";
+	var lastIndex = -1;
 
 	function before(element, insert) {
 		if (element.parentNode) {
@@ -66,6 +67,7 @@
 
 		// e.target.style.height = "0px";
 		status = "start";
+		lastIndex = index(dragSrcEl);
 	}
 
 	function handleDragEnd(e) {
@@ -74,8 +76,10 @@
 
 		status = "none";
 		before(placeHolder, dragSrcEl);
-		dragSrcEl = null;
 		ul.removeChild(placeHolder);
+		console.log("lastIndex: " + lastIndex + " newIndex: " + index(dragSrcEl));
+		lastIndex = -1;
+		dragSrcEl = null;
 	}
 
 	function handleDrop(e) {
@@ -106,11 +110,11 @@
 	// [].forEach.call(lis, function(li) {
 	  ul.addEventListener('dragstart', handleDragStart, false);
 	  ul.addEventListener('dragenter', handleDragEnter, false);
+	  ul.addEventListener('dragend', handleDragEnd, false);
 	  ul.addEventListener('drop', handleDrop, false);
 	  
 //	  li.addEventListener('dragover', handleDragOver, false);
 //	  li.addEventListener('dragleave', handleDragLeave, false);
-	  ul.addEventListener('dragend', handleDragEnd, false);
 	// });
 
 </script>

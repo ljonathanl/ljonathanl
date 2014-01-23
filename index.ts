@@ -1,4 +1,3 @@
-/// <reference path="util.ts" />
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
 

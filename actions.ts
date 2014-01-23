@@ -63,7 +63,7 @@ module actions {
 			var grid = world.grid;
 			var cell = grid.cells[robot.x][robot.y];
 			cell.color = color;
-			callback();
+			setTimeout(callback, 500);
 		}
 	};
 

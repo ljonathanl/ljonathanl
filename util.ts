@@ -15,4 +15,56 @@ module DomUtil {
 		for (var k=0,e=element; e = e.previousElementSibling; ++k);
 		return k;
 	}
+
+	export class DnDContainerBehavior {
+		private draggedElement:HTMLElement = null;
+		private status = "off";
+		private lastIndex = -1;
+		private draggedElementDisplayStyle:string = null;
+		constructor(public element:Element, public placeHolder:Element, public callback:(lastIndex:number, newIndex:number)=>void) {
+			this.element.addEventListener('dragstart', this.handleDragStart.bind(this), false);
+			this.element.addEventListener('dragenter', this.handleDragEnter.bind(this), false);
+			this.element.addEventListener('dragend', this.handleDragEnd.bind(this), false);
+		}
+
+		private handleDragStart(e:DragEvent) {
+			this.draggedElement = <HTMLElement>e.target;
+			e.dataTransfer.effectAllowed = 'move';
+			this.status = "start";
+			this.lastIndex = index(this.draggedElement);
+			this.draggedElementDisplayStyle = this.draggedElement.style.display;
+		}
+
+		private handleDragEnd(e:DragEvent) {
+			this.draggedElement.style.display = this.draggedElementDisplayStyle;
+			this.status = "none";
+			before(this.placeHolder, this.draggedElement);
+			this.element.removeChild(this.placeHolder);
+			var lastIndex = this.lastIndex;
+			var newIndex = index(this.draggedElement);
+			this.lastIndex = -1;
+			this.draggedElement = null;
+			this.draggedElementDisplayStyle = null;
+			this.callback(lastIndex, newIndex);
+		}
+
+		private handleDragEnter(e:DragEvent) {
+			if (this.status == "start") {
+				this.draggedElement.style.display = "none";
+				this.status = "enter";
+			}
+			var element:HTMLElement = <HTMLElement>e.target;
+			if (element.parentNode == this.element) {
+				var indexPlaceHolder = index(this.placeHolder);
+				var indexElement = index(element);
+				if (indexPlaceHolder < indexElement) {
+					after(element, this.placeHolder);
+				} else {
+					before(element, this.placeHolder);
+				}
+			}
+		}
+
+
+	}
 }

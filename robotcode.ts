@@ -1,3 +1,5 @@
+/// <reference path="util.ts" />
+
 module robotcode {
 	export class Cell {
 		view:HTMLDivElement;
@@ -117,6 +119,9 @@ module robotcode {
 			actions.className = "actions";
 			div.appendChild(actions);
 			this.actionsView = actions;
+			var placeHolder:HTMLDivElement = document.createElement("div");
+			placeHolder.className = "action placeholder";
+			new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
 			var playButton:HTMLButtonElement = document.createElement("button");
 			playButton.className = "control play";
 			playButton.onclick = () => {
@@ -148,12 +153,18 @@ module robotcode {
 		private addActionView(action:Action) {
 			var button:HTMLButtonElement = document.createElement("button");
 			button.className = "action " + action.name;
+			button.draggable = true;
 			this.actionsView.appendChild(button);
 		}
 		add(action:Action) {
 			this.actions.push(action);
 			this.addActionView(action);
 			return this;
+		}
+		move(lastIndex:number, newIndex:number) {
+			var action:Action = this.actions[lastIndex];
+			this.actions.splice(lastIndex, 1);
+			this.actions.splice(newIndex, 0, action);
 		}
 		play() {
 			this.isPaused = false;

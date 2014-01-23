@@ -1,3 +1,4 @@
+/// <reference path="util.ts" />
 var robotcode;
 (function (robotcode) {
     var Cell = (function () {
@@ -148,6 +149,9 @@ var robotcode;
             actions.className = "actions";
             div.appendChild(actions);
             this.actionsView = actions;
+            var placeHolder = document.createElement("div");
+            placeHolder.className = "action placeholder";
+            new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
             var playButton = document.createElement("button");
             playButton.className = "control play";
             playButton.onclick = function () {
@@ -179,12 +183,18 @@ var robotcode;
         Script.prototype.addActionView = function (action) {
             var button = document.createElement("button");
             button.className = "action " + action.name;
+            button.draggable = true;
             this.actionsView.appendChild(button);
         };
         Script.prototype.add = function (action) {
             this.actions.push(action);
             this.addActionView(action);
             return this;
+        };
+        Script.prototype.move = function (lastIndex, newIndex) {
+            var action = this.actions[lastIndex];
+            this.actions.splice(lastIndex, 1);
+            this.actions.splice(newIndex, 0, action);
         };
         Script.prototype.play = function () {
             this.isPaused = false;
