@@ -1,8 +1,14 @@
 /// <reference path="util.ts" />
 
 module robotcode {
+	export interface GridValue {
+		colors: any;
+		grid: string[];
+	}
+
 	export class Cell {
 		view:HTMLDivElement;
+		private _color:string;
 		constructor() {
 			this.createView();
 		}
@@ -13,18 +19,29 @@ module robotcode {
 		}
 		set color(value:string) {
 			this.view.style.backgroundColor = value;
+			this._color = value;
+		}
+		get color():string {
+			return this._color;
 		}
 	};
 
 	export class Grid {
 		view:HTMLDivElement;
 		cells:Cell[][];
-		constructor(public width, public height) {
+		width:number;
+		height:number;
+		constructor(public gridValue:GridValue) {
+			this.width = gridValue.grid[0].length;
+			this.height = gridValue.grid.length;
+
 			var cells:Cell[][] = [];
 			for (var i = 0; i < this.width; ++i) {
 				cells[i] = [];
+				var row = gridValue.grid[0]
 				for (var j = 0; j < this.height; ++j) {
 					var cell = new Cell();
+					cell.color = gridValue.colors[gridValue.grid[j][i]];
 					cells[i][j] = cell;
 				}
 			}		
@@ -46,6 +63,12 @@ module robotcode {
 			div.appendChild(table);
 			div.className = "grid";
 			this.view = div;
+		}
+		canMove(x:number, y:number):boolean {
+			if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+				return this.cells[x][y].color != "#000000";
+			}
+			return false;
 		}  
 	};
 

@@ -13,49 +13,27 @@ module actions {
 		}
 	};
 
-	export var up = new robotcode.Action("up", (world, callback:()=>void) => {
+	var move = function (offsetX:number, offsetY:number, angle:number) {
+		return (world:robotcode.World, callback:()=>void) => {
 			var robot = world.robot;
-			rotate(robot, -90, () => {
-				if (robot.y == 0) {
-					createjs.Tween.get(robot).to({y:-0.2}, 300).to({y:0}, 300).call(callback);
+			var grid = world.grid;
+			rotate(robot, angle, () => {
+				if (!grid.canMove(robot.x + offsetX, robot.y + offsetY)) {
+					createjs.Tween.get(robot).to({x:robot.x + offsetX * 0.2, y:robot.y + offsetY * 0.2}, 300).to({x:robot.x, y:robot.y}, 300).call(callback);
 				} else {
-					createjs.Tween.get(robot).to({y:robot.y-1}, 1000).call(callback);
-				}
-			});	
-		});
-
-	export var down = new robotcode.Action("down", (world, callback:()=>void) => {
-			var robot = world.robot;
-			rotate(robot, 90, () => {
-				if (robot.y >= world.grid.height - 1) {
-					createjs.Tween.get(robot).to({y:robot.y+0.2}, 300).to({y:robot.y}, 300).call(callback);
-				} else {	
-					createjs.Tween.get(robot).to({y:robot.y+1}, 1000).call(callback);
+					createjs.Tween.get(robot).to({x:robot.x + offsetX, y:robot.y + offsetY}, 1000).call(callback);
 				}
 			});
-		});
+		}	
+	};
 
-	export var left = new robotcode.Action("left", (world, callback:()=>void) => {
-			var robot = world.robot;
-			rotate(robot, 180, () => {
-				if (robot.x == 0) {
-					createjs.Tween.get(robot).to({x:-0.2}, 300).to({x:0}, 300).call(callback);
-				} else {	
-					createjs.Tween.get(robot).to({x:robot.x-1}, 1000).call(callback);
-				}
-			});
-		});
+	export var up = new robotcode.Action("up", move(0, -1, -90));
 
-	export var right = new robotcode.Action("right", (world, callback:()=>void) => {
-			var robot = world.robot;
-			rotate(robot, 0, () => {
-				if (robot.x >= world.grid.width - 1) {
-					createjs.Tween.get(robot).to({x:robot.x+0.2}, 300).to({x:robot.x}, 300).call(callback);
-				} else {	
-					createjs.Tween.get(robot).to({x:robot.x+1}, 1000).call(callback);
-				}
-			});
-		});
+	export var down = new robotcode.Action("down", move(0, 1, 90));
+	
+	export var left = new robotcode.Action("left", move(-1, 0, 180));
+	
+	export var right = new robotcode.Action("right", move(1, 0, 0));
 
 	var color = function (color:string) {
 		return (world:robotcode.World, callback:()=>void) => {

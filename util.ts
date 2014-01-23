@@ -16,9 +16,11 @@ module DomUtil {
 		return k;
 	}
 
+	enum Statuses {off, start, enter};
+
 	export class DnDContainerBehavior {
 		private draggedElement:HTMLElement = null;
-		private status = "off";
+		private status:Statuses = Statuses.off;
 		private lastIndex = -1;
 		private draggedElementDisplayStyle:string = null;
 		constructor(public element:Element, public placeHolder:Element, public callback:(lastIndex:number, newIndex:number)=>void) {
@@ -30,14 +32,14 @@ module DomUtil {
 		private handleDragStart(e:DragEvent) {
 			this.draggedElement = <HTMLElement>e.target;
 			e.dataTransfer.effectAllowed = 'move';
-			this.status = "start";
+			this.status = Statuses.start;
 			this.lastIndex = index(this.draggedElement);
 			this.draggedElementDisplayStyle = this.draggedElement.style.display;
 		}
 
 		private handleDragEnd(e:DragEvent) {
 			this.draggedElement.style.display = this.draggedElementDisplayStyle;
-			this.status = "none";
+			this.status = Statuses.off;
 			before(this.placeHolder, this.draggedElement);
 			this.element.removeChild(this.placeHolder);
 			var lastIndex = this.lastIndex;
@@ -49,9 +51,9 @@ module DomUtil {
 		}
 
 		private handleDragEnter(e:DragEvent) {
-			if (this.status == "start") {
+			if (this.status == Statuses.start) {
 				this.draggedElement.style.display = "none";
-				this.status = "enter";
+				this.status = Statuses.enter;
 			}
 			var element:HTMLElement = <HTMLElement>e.target;
 			if (element.parentNode == this.element) {

@@ -13,49 +13,27 @@ var actions;
         }
     };
 
-    actions.up = new robotcode.Action("up", function (world, callback) {
-        var robot = world.robot;
-        rotate(robot, -90, function () {
-            if (robot.y == 0) {
-                createjs.Tween.get(robot).to({ y: -0.2 }, 300).to({ y: 0 }, 300).call(callback);
-            } else {
-                createjs.Tween.get(robot).to({ y: robot.y - 1 }, 1000).call(callback);
-            }
-        });
-    });
+    var move = function (offsetX, offsetY, angle) {
+        return function (world, callback) {
+            var robot = world.robot;
+            var grid = world.grid;
+            rotate(robot, angle, function () {
+                if (!grid.canMove(robot.x + offsetX, robot.y + offsetY)) {
+                    createjs.Tween.get(robot).to({ x: robot.x + offsetX * 0.2, y: robot.y + offsetY * 0.2 }, 300).to({ x: robot.x, y: robot.y }, 300).call(callback);
+                } else {
+                    createjs.Tween.get(robot).to({ x: robot.x + offsetX, y: robot.y + offsetY }, 1000).call(callback);
+                }
+            });
+        };
+    };
 
-    actions.down = new robotcode.Action("down", function (world, callback) {
-        var robot = world.robot;
-        rotate(robot, 90, function () {
-            if (robot.y >= world.grid.height - 1) {
-                createjs.Tween.get(robot).to({ y: robot.y + 0.2 }, 300).to({ y: robot.y }, 300).call(callback);
-            } else {
-                createjs.Tween.get(robot).to({ y: robot.y + 1 }, 1000).call(callback);
-            }
-        });
-    });
+    actions.up = new robotcode.Action("up", move(0, -1, -90));
 
-    actions.left = new robotcode.Action("left", function (world, callback) {
-        var robot = world.robot;
-        rotate(robot, 180, function () {
-            if (robot.x == 0) {
-                createjs.Tween.get(robot).to({ x: -0.2 }, 300).to({ x: 0 }, 300).call(callback);
-            } else {
-                createjs.Tween.get(robot).to({ x: robot.x - 1 }, 1000).call(callback);
-            }
-        });
-    });
+    actions.down = new robotcode.Action("down", move(0, 1, 90));
 
-    actions.right = new robotcode.Action("right", function (world, callback) {
-        var robot = world.robot;
-        rotate(robot, 0, function () {
-            if (robot.x >= world.grid.width - 1) {
-                createjs.Tween.get(robot).to({ x: robot.x + 0.2 }, 300).to({ x: robot.x }, 300).call(callback);
-            } else {
-                createjs.Tween.get(robot).to({ x: robot.x + 1 }, 1000).call(callback);
-            }
-        });
-    });
+    actions.left = new robotcode.Action("left", move(-1, 0, 180));
+
+    actions.right = new robotcode.Action("right", move(1, 0, 0));
 
     var color = function (color) {
         return function (world, callback) {

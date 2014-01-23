@@ -11,8 +11,12 @@ var robotcode;
             this.view = div;
         };
         Object.defineProperty(Cell.prototype, "color", {
+            get: function () {
+                return this._color;
+            },
             set: function (value) {
                 this.view.style.backgroundColor = value;
+                this._color = value;
             },
             enumerable: true,
             configurable: true
@@ -23,14 +27,18 @@ var robotcode;
     ;
 
     var Grid = (function () {
-        function Grid(width, height) {
-            this.width = width;
-            this.height = height;
+        function Grid(gridValue) {
+            this.gridValue = gridValue;
+            this.width = gridValue.grid[0].length;
+            this.height = gridValue.grid.length;
+
             var cells = [];
             for (var i = 0; i < this.width; ++i) {
                 cells[i] = [];
+                var row = gridValue.grid[0];
                 for (var j = 0; j < this.height; ++j) {
                     var cell = new Cell();
+                    cell.color = gridValue.colors[gridValue.grid[j][i]];
                     cells[i][j] = cell;
                 }
             }
@@ -52,6 +60,12 @@ var robotcode;
             div.appendChild(table);
             div.className = "grid";
             this.view = div;
+        };
+        Grid.prototype.canMove = function (x, y) {
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                return this.cells[x][y].color != "#000000";
+            }
+            return false;
         };
         return Grid;
     })();

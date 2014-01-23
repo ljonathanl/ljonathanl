@@ -1,7 +1,29 @@
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
 
-var grid = new robotcode.Grid(10,10);
+var gridValue = {
+	colors: 
+	{ 
+		"B": "#000000",
+		"W": "#CCCCCC",
+		"R": "#FF0000",
+	},
+	grid:
+	[
+		"WWWWWBBBWW",
+		"WBWWWWWWWW",
+		"WWWWWBWWWW",
+		"WWWWWWWWWB",
+		"WWWBWWWWWW",
+		"WWWWWWWWWB",
+		"WWWWWWWWWW",
+		"WWWBBWRRWW",
+		"WWWWWBWWWW",
+		"WWWWWWWWWW"
+	]
+}
+
+var grid = new robotcode.Grid(gridValue);
 var robot = new robotcode.Robot();
 grid.view.appendChild(robot.view);
 var world = new robotcode.World(robot, grid);
@@ -18,3 +40,5 @@ var scriptContainer = document.querySelector(".scriptContainer");
 gridContainer.appendChild(grid.view);
 scriptContainer.appendChild(availableActions.view);
 scriptContainer.appendChild(script.view);
+
+
