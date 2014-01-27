@@ -14,7 +14,7 @@ var gridValue = {
         "WWWBWWWWWW",
         "WWWWWWWWWB",
         "WWWWWWWWWW",
-        "WWWBBWRRWW",
+        "WWWBBWWWWW",
         "WWWWWBWWWW",
         "WWWWWWWWWW"
     ]
@@ -23,6 +23,7 @@ var gridValue = {
 var grid = new robotcode.Grid(gridValue);
 var robot = new robotcode.Robot();
 grid.view.appendChild(robot.view);
+
 var world = new robotcode.World(robot, grid);
 var script = new robotcode.Script(world);
 var availableActions = new robotcode.AvailableActions(script);

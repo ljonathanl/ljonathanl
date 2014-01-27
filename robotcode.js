@@ -260,12 +260,10 @@ var robotcode;
     var AvailableActions = (function () {
         function AvailableActions(script) {
             this.script = script;
-            this.actionsMap = {};
             this.actions = [];
             this.createView();
         }
         AvailableActions.prototype.add = function (action) {
-            this.actionsMap[action.name] = action;
             this.actions.push(action);
             this.addActionView(action);
             return this;

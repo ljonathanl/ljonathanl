@@ -235,14 +235,12 @@ module robotcode {
 	};
 
 	export class AvailableActions {
-		actionsMap: {[key:string]:Action} = {};
 		actions: Action[] = [];
 		view:HTMLDivElement;
 		constructor(public script:Script) {
 			this.createView();
 		}
 		add(action:Action) {
-			this.actionsMap[action.name] = action;
 			this.actions.push(action);
 			this.addActionView(action);
 			return this;
