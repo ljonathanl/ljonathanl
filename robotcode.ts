@@ -6,110 +6,47 @@ module robotcode {
 		grid: string[];
 	}
 
+
+	export function createGrid(gridValue:GridValue):Grid {
+		var grid = new Grid();
+		grid.width = gridValue.grid[0].length;
+		grid.height = gridValue.grid.length;
+
+		var cells:Cell[][] = [];
+		for (var i = 0; i < grid.width; ++i) {
+			cells[i] = [];
+			var row = gridValue.grid[0]
+			for (var j = 0; j < grid.height; ++j) {
+				var cell = new Cell();
+				cell.color = gridValue.colors[gridValue.grid[j][i]];
+				cells[i][j] = cell;
+			}
+		}		
+		grid.cells = cells;
+		return grid;
+	}
+
+	export function canMove(grid:Grid, x:number, y:number):boolean {
+		if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
+			return grid.cells[x][y].color != "#000000";
+		}
+		return false;
+	}
+
 	export class Cell {
-		view:HTMLDivElement;
-		private _color:string;
-		constructor() {
-			this.createView();
-		}
-		private createView() {
-			var div = document.createElement("div");
-			div.className = "cell";
-			this.view = div;
-		}
-		set color(value:string) {
-			this.view.style.backgroundColor = value;
-			this._color = value;
-		}
-		get color():string {
-			return this._color;
-		}
+		public color:string;
 	};
 
 	export class Grid {
-		view:HTMLDivElement;
 		cells:Cell[][];
 		width:number;
 		height:number;
-		constructor(public gridValue:GridValue) {
-			this.width = gridValue.grid[0].length;
-			this.height = gridValue.grid.length;
-
-			var cells:Cell[][] = [];
-			for (var i = 0; i < this.width; ++i) {
-				cells[i] = [];
-				var row = gridValue.grid[0]
-				for (var j = 0; j < this.height; ++j) {
-					var cell = new Cell();
-					cell.color = gridValue.colors[gridValue.grid[j][i]];
-					cells[i][j] = cell;
-				}
-			}		
-			this.cells = cells;
-			this.createView();
-		}
-		private createView() {
-			var div = document.createElement("div");
-			var table = document.createElement("table");
-			for (var j = 0; j < this.height; ++j) {
-				var row = document.createElement("tr");
-				for (var i = 0; i < this.width; ++i) {
-					var td = document.createElement("td");
-					td.appendChild(this.cells[i][j].view);
-					row.appendChild(td);
-				}
-				table.appendChild(row);		
-			}
-			div.appendChild(table);
-			div.className = "grid";
-			this.view = div;
-		}
-		canMove(x:number, y:number):boolean {
-			if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-				return this.cells[x][y].color != "#000000";
-			}
-			return false;
-		}  
 	};
 
 	export class Robot {
-		private _x:number;
-		private _y:number;
-		private _angle:number;
-		view:HTMLDivElement;
-		constructor() {
-			this.createView();
-			this.x = 0;
-			this.y = 0;
-			this.angle = 0;
-		}
-		private createView() {
-			var div = document.createElement("div");
-			div.className = "robot";
-			this.view = div;
-		}
-		set x(value:number) {
-			this._x = value;
-			this.view.style.left = value * 60 + "px";
-		}
-		get x() {
-			return this._x;
-		}
-		set y(value:number) {
-			this._y = value;
-			this.view.style.top = value * 60 + "px";
-		}
-		get y() {
-			return this._y;
-		}
-		set angle(value:number) {
-			this._angle = value;
-			this.view.style["webkitTransform"] = "rotate(" + value + "deg)";
-		}
-		get angle() {
-			return this._angle;
-		}
-		
+		x = 0;
+		y = 0;
+		angle = 0;
 	};
 
 	export class World {

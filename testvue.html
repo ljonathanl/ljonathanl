@@ -10,30 +10,16 @@
 		<script type="text/javascript" src="lib/vue.js"></script>
 	</head>
 	<body>
-		<!-- <table id="grid">
+		<table id="grid">
 			<tr v-repeat="line: cells">
 				<td v-repeat="cell: line">
 					{{cell}}
 				</td>
 			</tr>
-		</table> -->
-		<rc-grid id="grid"></rc-grid>
+		</table>
 		<script type="text/javascript">
-			var Grid = Vue.extend({
-				replace: true,
-				template: 
-					'<table>' +
-					'	<tr v-repeat="line: cells">' +
-					'		<td v-repeat="cell: line">' +
-					'			{{cell}}' +
-					'		</td>' +
-					'	</tr>' +
-					'</table>'
-			});
-			Vue.component("rc-grid", Grid);
-
-			var grid = new Grid({
-				el: "rc-grid",
+			var grid = new Vue({
+				el: "#grid",
 				data: {
 					cells: [
 						["00", "01", "02", "03"],

@@ -3,24 +3,7 @@ var robotcode;
 (function (robotcode) {
     var Cell = (function () {
         function Cell() {
-            this.createView();
         }
-        Cell.prototype.createView = function () {
-            var div = document.createElement("div");
-            div.className = "cell";
-            this.view = div;
-        };
-        Object.defineProperty(Cell.prototype, "color", {
-            get: function () {
-                return this._color;
-            },
-            set: function (value) {
-                this.view.style.backgroundColor = value;
-                this._color = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
         return Cell;
     })();
     robotcode.Cell = Cell;
@@ -43,24 +26,7 @@ var robotcode;
                 }
             }
             this.cells = cells;
-            this.createView();
         }
-        Grid.prototype.createView = function () {
-            var div = document.createElement("div");
-            var table = document.createElement("table");
-            for (var j = 0; j < this.height; ++j) {
-                var row = document.createElement("tr");
-                for (var i = 0; i < this.width; ++i) {
-                    var td = document.createElement("td");
-                    td.appendChild(this.cells[i][j].view);
-                    row.appendChild(td);
-                }
-                table.appendChild(row);
-            }
-            div.appendChild(table);
-            div.className = "grid";
-            this.view = div;
-        };
         Grid.prototype.canMove = function (x, y) {
             if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                 return this.cells[x][y].color != "#000000";

@@ -135,13 +135,31 @@
 		<script type="text/javascript" src="lib/Ticker.js"></script>
 		<script type="text/javascript" src="lib/Ease.js"></script>
 		<script type="text/javascript" src="lib/Tween.js"></script>
+		<script type="text/javascript" src="lib/vue.js"></script>
 	</head>
 	<body>
-		<div class="gridContainer"></div>
-		<div class="scriptContainer"></div>	
-		<script type="text/javascript" src="util.js"></script>
-		<script type="text/javascript" src="robotcode.js"></script>
-		<script type="text/javascript" src="actions.js"></script>
+		<div class="gridContainer">
+			<table class="grid">
+				<tr v-repeat="line: cells">
+					<td v-repeat="cell: line">
+						<div class="cell" 
+							style="background-color: {{cell.color}}">
+						</div>
+					</td>
+				</tr>
+			</table>
+			<div class="robot"
+				style="
+					left: {{x*60}}px;
+					top: {{y*60}}px;
+					-webkit-transform: rotate({{angle}}deg);
+				">
+			</div>
+		</div>
+		<div class="scriptContainer">
+			
+		</div>	
+		
 		<script type="text/javascript" src="index.js"></script>
 	</body>
 </html>

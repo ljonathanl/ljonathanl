@@ -18,7 +18,7 @@ module actions {
 			var robot = world.robot;
 			var grid = world.grid;
 			rotate(robot, angle, () => {
-				if (!grid.canMove(robot.x + offsetX, robot.y + offsetY)) {
+				if (!robotcode.canMove(grid, robot.x + offsetX, robot.y + offsetY)) {
 					createjs.Tween.get(robot).to({x:robot.x + offsetX * 0.2, y:robot.y + offsetY * 0.2}, 300).to({x:robot.x, y:robot.y}, 300).call(callback);
 				} else {
 					createjs.Tween.get(robot).to({x:robot.x + offsetX, y:robot.y + offsetY}, 1000).call(callback);
