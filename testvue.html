@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<title>RobotCode</title>
+
+		<style type="text/css">
+
+
+		</style>
+
+		<script type="text/javascript" src="lib/vue.js"></script>
+	</head>
+	<body>
+		<!-- <table id="grid">
+			<tr v-repeat="line: cells">
+				<td v-repeat="cell: line">
+					{{cell}}
+				</td>
+			</tr>
+		</table> -->
+		<rc-grid id="grid"></rc-grid>
+		<script type="text/javascript">
+			var Grid = Vue.extend({
+				replace: true,
+				template: 
+					'<table>' +
+					'	<tr v-repeat="line: cells">' +
+					'		<td v-repeat="cell: line">' +
+					'			{{cell}}' +
+					'		</td>' +
+					'	</tr>' +
+					'</table>'
+			});
+			Vue.component("rc-grid", Grid);
+
+			var grid = new Grid({
+				el: "rc-grid",
+				data: {
+					cells: [
+						["00", "01", "02", "03"],
+						["10", "11", "12", "13"],
+						["20", "21", "22", "23"],
+					]
+				}
+			}); 
+		</script>
+	</body>
+</html>
