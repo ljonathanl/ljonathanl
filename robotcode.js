@@ -144,11 +144,28 @@ var robotcode;
 
     var Script = (function () {
         function Script(world) {
+            var _this = this;
             this.world = world;
             this.actions = [];
             this.currentIndex = 0;
             this.isPaused = true;
-            this.bindNext = this.next.bind(this);
+            this.next = function () {
+                if (!_this.isPaused) {
+                    if (_this.currentIndex >= 0 && _this.currentIndex < _this.actions.length) {
+                        var currentActionView = _this.actionsView.querySelector(".executing");
+                        if (currentActionView)
+                            currentActionView.classList.remove("executing");
+                        currentActionView = _this.actionsView.childNodes.item(_this.currentIndex);
+                        currentActionView.className += " executing";
+                        var action = _this.actions[_this.currentIndex];
+                        _this.currentIndex = (_this.currentIndex + 1) % _this.actions.length;
+                        if (_this.currentIndex == 0) {
+                            _this.pause();
+                        }
+                        action.act(_this.world, _this.next);
+                    }
+                }
+            };
             this.createView();
         }
         Script.prototype.createView = function () {
@@ -233,24 +250,6 @@ var robotcode;
                 this.actionsView.removeChild(this.actionsView.lastChild);
             }
             return this.stop();
-        };
-
-        Script.prototype.next = function () {
-            if (!this.isPaused) {
-                if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
-                    var currentActionView = this.actionsView.querySelector(".executing");
-                    if (currentActionView)
-                        currentActionView.classList.remove("executing");
-                    currentActionView = this.actionsView.childNodes.item(this.currentIndex);
-                    currentActionView.className += " executing";
-                    var action = this.actions[this.currentIndex];
-                    this.currentIndex = (this.currentIndex + 1) % this.actions.length;
-                    if (this.currentIndex == 0) {
-                        this.pause();
-                    }
-                    action.act(this.world, this.bindNext);
-                }
-            }
         };
         return Script;
     })();

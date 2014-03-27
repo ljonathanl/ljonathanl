@@ -213,9 +213,8 @@ module robotcode {
 			}
 			return this.stop();
 		}
-		private bindNext = this.next.bind(this);
 
-		private next() {
+		private next = () => {
 			if (!this.isPaused) {
 				if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
 					var currentActionView = <HTMLButtonElement>this.actionsView.querySelector(".executing");
@@ -227,7 +226,7 @@ module robotcode {
 					if (this.currentIndex == 0) {
 						this.pause();
 					}
-					action.act(this.world, this.bindNext);
+					action.act(this.world, this.next);
 				}
 
 			}
