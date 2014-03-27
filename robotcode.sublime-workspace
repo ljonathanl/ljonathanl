@@ -4,20 +4,76 @@
 		"selected_items":
 		[
 			[
-				"p",
-				"[pub] ○ play (): Script"
+				"pa",
+				"  pauseButton HTMLButtonElement"
+			],
+			[
+				"pl",
+				"[pub] ● playButton HTMLButtonElement"
+			],
+			[
+				"c",
+				"[pub] ● currentIndex number"
+			],
+			[
+				"ch",
+				"[pub] ● childNodes NodeList"
+			],
+			[
+				"rem",
+				"[pub] ○ removeChild (oldChild: Node): Node"
+			],
+			[
+				"la",
+				"[pub] ● lastChild Node"
 			],
 			[
 				"a",
-				"[pub] ○ add (action: () => void): Script"
+				"[pub] ● actions Action[]"
+			],
+			[
+				"in",
+				"inline-block"
 			],
 			[
 				"scr",
-				"  script Script"
+				"  scriptContainer any"
 			],
 			[
 				"sc",
-				"  script Script"
+				"  scriptContainer any"
+			],
+			[
+				"p",
+				"position"
+			],
+			[
+				"wid",
+				"width"
+			],
+			[
+				"ro",
+				"  rotate (robot: Robot, angle: number) => void"
+			],
+			[
+				"ba",
+				"background-image"
+			],
+			[
+				"ac",
+				"[pub] ● actionsView HTMLDivElement"
+			],
+			[
+				"wi",
+				"width"
+			],
+			[
+				"bo",
+				"border"
+			],
+			[
+				"Ac",
+				" ◆ Action Action"
 			],
 			[
 				"backgroud-c",
@@ -63,24 +119,24 @@
 			"file": "index.html",
 			"settings":
 			{
-				"buffer_size": 935,
+				"buffer_size": 2382,
 				"line_ending": "Windows",
 				"name": "<html>"
-			}
-		},
-		{
-			"file": "lib/TweenJS-release_v0.5.1/examples/TweenOnlyDemo.html",
-			"settings":
-			{
-				"buffer_size": 2727,
-				"line_ending": "Unix"
 			}
 		},
 		{
 			"file": "index.ts",
 			"settings":
 			{
-				"buffer_size": 3693,
+				"buffer_size": 999,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "robotcode.js",
+			"settings":
+			{
+				"buffer_size": 10171,
 				"line_ending": "Windows"
 			}
 		},
@@ -89,14 +145,6 @@
 			"settings":
 			{
 				"buffer_size": 73,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/TweenJS-release_v0.5.1/examples/CssExample.html",
-			"settings":
-			{
-				"buffer_size": 2824,
 				"line_ending": "Unix"
 			}
 		},
@@ -112,7 +160,7 @@
 			"file": "index.js",
 			"settings":
 			{
-				"buffer_size": 5099,
+				"buffer_size": 1062,
 				"line_ending": "Windows"
 			}
 		}
@@ -148,8 +196,17 @@
 	},
 	"file_history":
 	[
-		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/User/Typescript.sublime-settings",
+		"/C/Users/Jonathan/Documents/code/RobotCode/robotcode.sublime-project",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/User/Default (Windows).sublime-keymap",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/Default/Default (Windows).sublime-keymap",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/T3S/CHANGES.txt",
 		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/T3S/Typescript.sublime-settings",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/User/JSON.sublime-settings",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/Jonathan/Documents/code/RobotCode/lib/TweenJS-release_v0.5.1/examples/CssExample.html",
+		"/C/Users/Jonathan/Documents/code/RobotCode/lib/TweenJS-release_v0.5.1/examples/TweenOnlyDemo.html",
+		"/C/Users/Jonathan/AppData/Roaming/Sublime Text 3/Packages/User/Typescript.sublime-settings",
 		"/C/Users/Jonathan/Documents/code/RobotCode/lib/TweenJS-release_v0.5.1/src/createjs/events/Event.js",
 		"/C/Users/Jonathan/Documents/code/Typescript/samples/raytracer/raytracer.html",
 		"/C/Users/Jonathan/Documents/code/Typescript/samples/raytracer/raytracer.js",
@@ -163,7 +220,7 @@
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 30.0
 	},
 	"find_in_files":
 	{
@@ -177,6 +234,26 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"\",\n",
+			"className",
+			"textContent",
+			"play",
+			"stop",
+			"grid",
+			"up",
+			"\n		",
+			"up",
+			"\n		.",
+			"		",
+			"up",
+			"play",
+			"0.3",
+			"world,",
+			"_this",
+			"ctrl+shift+d",
+			"ctrl+shift+k",
+			"delete_line",
+			"left"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -203,15 +280,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 935,
+						"buffer_size": 2382,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								718,
-								718
+								955,
+								955
 							]
 						],
 						"settings":
@@ -220,57 +297,27 @@
 							"syntax": "Packages/HTML/HTML.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 112.0,
+						"translation.y": 916.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "lib/TweenJS-release_v0.5.1/examples/TweenOnlyDemo.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2727,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1118,
-								1118
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 704.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "index.ts",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3693,
+						"buffer_size": 999,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2827,
-								2827
+								709,
+								709
 							]
 						],
 						"settings":
@@ -283,7 +330,37 @@
 							"syntax": "Packages/T3S/Typescript.tmlanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 2796.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "robotcode.js",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 10171,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -292,7 +369,7 @@
 				{
 					"buffer": 3,
 					"file": "robotcode.sublime-project",
-					"semi_transient": true,
+					"semi_transient": false,
 					"settings":
 					{
 						"buffer_size": 73,
@@ -314,40 +391,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "lib/TweenJS-release_v0.5.1/examples/CssExample.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2824,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2396,
-								2396
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 596.0,
-						"zoom_level": 1.0
-					},
 					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 4,
 					"file": "lib/tweenjs.d.ts",
 					"semi_transient": false,
 					"settings":
@@ -375,27 +423,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2892.0,
+						"translation.y": 2604.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 5,
 					"file": "index.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5099,
+						"buffer_size": 1062,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2095,
-								2095
+								1062,
+								1062
 							]
 						],
 						"settings":
@@ -405,10 +453,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 904.0,
+						"translation.y": 792.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -416,7 +464,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 30.0
 	},
 	"input":
 	{
@@ -456,7 +504,7 @@
 	"project": "robotcode.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 56.0
 	},
 	"save_all_on_build": true,
 	"select_file":

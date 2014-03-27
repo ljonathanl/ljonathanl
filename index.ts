@@ -6,7 +6,6 @@ var gridValue = {
 	{ 
 		"B": "#000000",
 		"W": "#CCCCCC",
-		"R": "#FF0000",
 	},
 	grid:
 	[
@@ -17,7 +16,7 @@ var gridValue = {
 		"WWWBWWWWWW",
 		"WWWWWWWWWB",
 		"WWWWWWWWWW",
-		"WWWBBWRRWW",
+		"WWWBBWWWWW",
 		"WWWWWBWWWW",
 		"WWWWWWWWWW"
 	]
@@ -32,7 +31,13 @@ var availableActions = new robotcode.AvailableActions(script);
 
 
 
-availableActions.add(actions.up).add(actions.down).add(actions.left).add(actions.right).add(actions.colorRed).add(actions.colorGreen);
+availableActions
+	.add(actions.up)
+	.add(actions.down)
+	.add(actions.left)
+	.add(actions.right)
+	.add(actions.colorRed)
+	.add(actions.colorGreen);
 
 var gridContainer = document.querySelector(".gridContainer");
 var scriptContainer = document.querySelector(".scriptContainer");

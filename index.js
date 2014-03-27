@@ -3,8 +3,7 @@
 var gridValue = {
     colors: {
         "B": "#000000",
-        "W": "#CCCCCC",
-        "R": "#FF0000"
+        "W": "#CCCCCC"
     },
     grid: [
         "WWWWWBBBWW",
@@ -14,7 +13,7 @@ var gridValue = {
         "WWWBWWWWWW",
         "WWWWWWWWWB",
         "WWWWWWWWWW",
-        "WWWBBWRRWW",
+        "WWWBBWWWWW",
         "WWWWWBWWWW",
         "WWWWWWWWWW"
     ]
