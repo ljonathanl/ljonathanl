@@ -40,7 +40,7 @@ module robotcode {
 	};
 
 	export class AvailableActions {
-		actions: Action[] = [];
+		constructor(public actions:Action[]){}
 	};	
 
 	export var mapActions:{[key:string]:(world:robotcode.World, callback:()=>void)=>void} = {};
@@ -91,18 +91,6 @@ module robotcode {
 		constructor(public world:World) {
 			this.control = new Control();
 		}
-/*		private createView() {
-			var div:HTMLDivElement = document.createElement("div");
-			div.className = "script";
-			this.view = div;
-			var actions:HTMLDivElement = document.createElement("div");
-			actions.className = "actions";
-			div.appendChild(actions);
-			this.actionsView = actions;
-			var placeHolder:HTMLDivElement = document.createElement("div");
-			placeHolder.className = "action placeholder";
-			new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
-		}*/
 		add(action:Action) {
 			this.actions.push(new ActionInstance(action));
 			return this;

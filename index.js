@@ -151,8 +151,8 @@ var robotcode;
     ;
 
     var AvailableActions = (function () {
-        function AvailableActions() {
-            this.actions = [];
+        function AvailableActions(actions) {
+            this.actions = actions;
         }
         return AvailableActions;
     })();
@@ -221,18 +221,6 @@ var robotcode;
             };
             this.control = new Control();
         }
-        /*		private createView() {
-        var div:HTMLDivElement = document.createElement("div");
-        div.className = "script";
-        this.view = div;
-        var actions:HTMLDivElement = document.createElement("div");
-        actions.className = "actions";
-        div.appendChild(actions);
-        this.actionsView = actions;
-        var placeHolder:HTMLDivElement = document.createElement("div");
-        placeHolder.className = "action placeholder";
-        new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
-        }*/
         Script.prototype.add = function (action) {
             this.actions.push(new ActionInstance(action));
             return this;
@@ -345,9 +333,7 @@ var robot = new robotcode.Robot();
 
 var world = new robotcode.World(robot, grid);
 var script = new robotcode.Script(world);
-var availableActions = new robotcode.AvailableActions();
-
-availableActions.actions = [actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen];
+var availableActions = new robotcode.AvailableActions([actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen]);
 
 var gridView = new Vue({
     el: ".grid",
