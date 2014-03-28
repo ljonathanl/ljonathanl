@@ -27,26 +27,26 @@ module actions {
 		}	
 	};
 
-	export var up = new robotcode.Action("up", move(0, -1, -90));
-
-	export var down = new robotcode.Action("down", move(0, 1, 90));
-	
-	export var left = new robotcode.Action("left", move(-1, 0, 180));
-	
-	export var right = new robotcode.Action("right", move(1, 0, 0));
-
 	var color = function (color:string) {
 		return (world:robotcode.World, callback:()=>void) => {
 			var robot = world.robot;
 			var grid = world.grid;
-			var cell = grid.cells[robot.x][robot.y];
-			cell.color = color;
+			robotcode.setCellColor(grid, robot.x, robot.y, color);
 			setTimeout(callback, 500);
 		}
 	};
 
-	export var colorRed = new robotcode.Action("colorRed", color("#FF0000"));
-	export var colorGreen = new robotcode.Action("colorGreen", color("#00FF00"));
+	export var up = new robotcode.Action("up");
+	export var down = new robotcode.Action("down");
+	export var left = new robotcode.Action("left");
+	export var right = new robotcode.Action("right");
+	export var colorRed = new robotcode.Action("colorRed");
+	export var colorGreen = new robotcode.Action("colorGreen");
 
-
+	robotcode.mapActions[up.name] = move(0, -1, -90);
+	robotcode.mapActions[down.name] = move(0, 1, 90);
+	robotcode.mapActions[left.name] = move(-1, 0, 180);
+	robotcode.mapActions[right.name] = move(1, 0, 0);
+	robotcode.mapActions[colorRed.name] = color("#FF0000");
+	robotcode.mapActions[colorGreen.name] = color("#00FF00");
 }

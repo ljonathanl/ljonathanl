@@ -32,15 +32,13 @@ var robot = new robotcode.Robot();
 
 var world = new robotcode.World(robot, grid);
 var script = new robotcode.Script(world);
-var availableActions = new robotcode.AvailableActions(script);
+var availableActions = new robotcode.AvailableActions();
 
 
-
-availableActions.add(actions.up).add(actions.down).add(actions.left).add(actions.right).add(actions.colorRed).add(actions.colorGreen);
+availableActions.actions = [actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen];
 
 var scriptContainer = document.querySelector(".scriptContainer");
 
-scriptContainer.appendChild(availableActions.view);
 scriptContainer.appendChild(script.view);
 
 var gridView = new Vue({
@@ -51,4 +49,33 @@ var gridView = new Vue({
 var robotView = new Vue({
 	el: ".robot",
 	data: robot
-})
+});
+
+var controlView = new Vue({
+	el: ".controlBoard",
+	data: script.control,
+	methods: {
+		play: ()=>{
+			script.play();
+		},
+		pause: ()=>{
+			script.pause();
+		},
+		clear: ()=>{
+			script.clear();
+		},
+		stop: ()=>{
+			script.stop();
+		},
+	}
+});
+
+var availableActionsView = new Vue({
+	el: ".availableActions",
+	data: availableActions,
+	methods: {
+		add: (action:robotcode.Action)=>{
+			script.add(action);
+		},
+	}
+});

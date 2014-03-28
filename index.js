@@ -86,34 +86,6 @@ var DomUtil;
 /// <reference path="util.ts" />
 var robotcode;
 (function (robotcode) {
-    function createGrid(gridValue) {
-        var grid = new Grid();
-        grid.width = gridValue.grid[0].length;
-        grid.height = gridValue.grid.length;
-
-        var cells = [];
-        for (var i = 0; i < grid.width; ++i) {
-            cells[i] = [];
-            var row = gridValue.grid[0];
-            for (var j = 0; j < grid.height; ++j) {
-                var cell = new Cell();
-                cell.color = gridValue.colors[gridValue.grid[j][i]];
-                cells[i][j] = cell;
-            }
-        }
-        grid.cells = cells;
-        return grid;
-    }
-    robotcode.createGrid = createGrid;
-
-    function canMove(grid, x, y) {
-        if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
-            return grid.cells[x][y].color != "#000000";
-        }
-        return false;
-    }
-    robotcode.canMove = canMove;
-
     var Cell = (function () {
         function Cell() {
         }
@@ -152,14 +124,67 @@ var robotcode;
     ;
 
     var Action = (function () {
-        function Action(name, act) {
+        function Action(name) {
             this.name = name;
-            this.act = act;
         }
         return Action;
     })();
     robotcode.Action = Action;
     ;
+
+    var Control = (function () {
+        function Control() {
+        }
+        return Control;
+    })();
+    robotcode.Control = Control;
+
+    var AvailableActions = (function () {
+        function AvailableActions() {
+            this.actions = [];
+        }
+        return AvailableActions;
+    })();
+    robotcode.AvailableActions = AvailableActions;
+    ;
+
+    robotcode.mapActions = {};
+
+    function setCellColor(grid, x, y, color) {
+        var cell = grid.cells[y][x];
+        if (cell) {
+            cell.color = color;
+        }
+    }
+    robotcode.setCellColor = setCellColor;
+
+    function createGrid(gridValue) {
+        var grid = new Grid();
+        grid.width = gridValue.grid[0].length;
+        grid.height = gridValue.grid.length;
+
+        var cells = [];
+        for (var j = 0; j < grid.height; ++j) {
+            cells[j] = [];
+            var row = gridValue.grid[0];
+            for (var i = 0; i < grid.width; ++i) {
+                var cell = new Cell();
+                cell.color = gridValue.colors[gridValue.grid[j][i]];
+                cells[j][i] = cell;
+            }
+        }
+        grid.cells = cells;
+        return grid;
+    }
+    robotcode.createGrid = createGrid;
+
+    function canMove(grid, x, y) {
+        if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
+            return grid.cells[y][x].color != "#000000";
+        }
+        return false;
+    }
+    robotcode.canMove = canMove;
 
     var Script = (function () {
         function Script(world) {
@@ -181,20 +206,17 @@ var robotcode;
                         if (_this.currentIndex == 0) {
                             _this.pause();
                         }
-                        action.act(_this.world, _this.next);
+                        robotcode.mapActions[action.name](_this.world, _this.next);
                     }
                 }
             };
             this.createView();
+            this.control = new Control();
         }
         Script.prototype.createView = function () {
-            var _this = this;
             var div = document.createElement("div");
             div.className = "script";
             this.view = div;
-            var control = document.createElement("div");
-            control.className = "controlBoard";
-            div.appendChild(control);
             var actions = document.createElement("div");
             actions.className = "actions";
             div.appendChild(actions);
@@ -203,32 +225,6 @@ var robotcode;
             placeHolder.className = "action placeholder";
             new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
             var playButton = document.createElement("button");
-            playButton.className = "control play";
-            playButton.onclick = function () {
-                _this.play();
-            };
-            control.appendChild(playButton);
-            this.playButton = playButton;
-            var pauseButton = document.createElement("button");
-            pauseButton.className = "control pause";
-            pauseButton.onclick = function () {
-                _this.pause();
-            };
-            control.appendChild(pauseButton);
-            pauseButton.style.display = "none";
-            this.pauseButton = pauseButton;
-            var stopButton = document.createElement("button");
-            stopButton.className = "control stop";
-            stopButton.onclick = function () {
-                _this.stop();
-            };
-            control.appendChild(stopButton);
-            var clearButton = document.createElement("button");
-            clearButton.className = "control clear";
-            clearButton.onclick = function () {
-                _this.clear();
-            };
-            control.appendChild(clearButton);
         };
         Script.prototype.addActionView = function (action) {
             var button = document.createElement("button");
@@ -248,15 +244,13 @@ var robotcode;
         };
         Script.prototype.play = function () {
             this.isPaused = false;
-            this.playButton.style.display = "none";
-            this.pauseButton.style.display = "inline";
+            this.control.playing = true;
             this.next();
             return this;
         };
         Script.prototype.pause = function () {
             this.isPaused = true;
-            this.playButton.style.display = "inline";
-            this.pauseButton.style.display = "none";
+            this.control.playing = false;
             return this;
         };
         Script.prototype.stop = function () {
@@ -273,36 +267,6 @@ var robotcode;
         return Script;
     })();
     robotcode.Script = Script;
-    ;
-
-    var AvailableActions = (function () {
-        function AvailableActions(script) {
-            this.script = script;
-            this.actions = [];
-            this.createView();
-        }
-        AvailableActions.prototype.add = function (action) {
-            this.actions.push(action);
-            this.addActionView(action);
-            return this;
-        };
-        AvailableActions.prototype.createView = function () {
-            var div = document.createElement("div");
-            div.className = "availableActions";
-            this.view = div;
-        };
-        AvailableActions.prototype.addActionView = function (action) {
-            var _this = this;
-            var button = document.createElement("button");
-            button.className = "action " + action.name;
-            button.onclick = function () {
-                _this.script.add(action);
-            };
-            this.view.appendChild(button);
-        };
-        return AvailableActions;
-    })();
-    robotcode.AvailableActions = AvailableActions;
     ;
 })(robotcode || (robotcode = {}));
 /// <reference path="robotcode.ts" />
@@ -334,26 +298,28 @@ var actions;
         };
     };
 
-    actions.up = new robotcode.Action("up", move(0, -1, -90));
-
-    actions.down = new robotcode.Action("down", move(0, 1, 90));
-
-    actions.left = new robotcode.Action("left", move(-1, 0, 180));
-
-    actions.right = new robotcode.Action("right", move(1, 0, 0));
-
     var color = function (color) {
         return function (world, callback) {
             var robot = world.robot;
             var grid = world.grid;
-            var cell = grid.cells[robot.x][robot.y];
-            cell.color = color;
+            robotcode.setCellColor(grid, robot.x, robot.y, color);
             setTimeout(callback, 500);
         };
     };
 
-    actions.colorRed = new robotcode.Action("colorRed", color("#FF0000"));
-    actions.colorGreen = new robotcode.Action("colorGreen", color("#00FF00"));
+    actions.up = new robotcode.Action("up");
+    actions.down = new robotcode.Action("down");
+    actions.left = new robotcode.Action("left");
+    actions.right = new robotcode.Action("right");
+    actions.colorRed = new robotcode.Action("colorRed");
+    actions.colorGreen = new robotcode.Action("colorGreen");
+
+    robotcode.mapActions[actions.up.name] = move(0, -1, -90);
+    robotcode.mapActions[actions.down.name] = move(0, 1, 90);
+    robotcode.mapActions[actions.left.name] = move(-1, 0, 180);
+    robotcode.mapActions[actions.right.name] = move(1, 0, 0);
+    robotcode.mapActions[actions.colorRed.name] = color("#FF0000");
+    robotcode.mapActions[actions.colorGreen.name] = color("#00FF00");
 })(actions || (actions = {}));
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
@@ -382,13 +348,12 @@ var robot = new robotcode.Robot();
 
 var world = new robotcode.World(robot, grid);
 var script = new robotcode.Script(world);
-var availableActions = new robotcode.AvailableActions(script);
+var availableActions = new robotcode.AvailableActions();
 
-availableActions.add(actions.up).add(actions.down).add(actions.left).add(actions.right).add(actions.colorRed).add(actions.colorGreen);
+availableActions.actions = [actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen];
 
 var scriptContainer = document.querySelector(".scriptContainer");
 
-scriptContainer.appendChild(availableActions.view);
 scriptContainer.appendChild(script.view);
 
 var gridView = new Vue({
@@ -399,4 +364,33 @@ var gridView = new Vue({
 var robotView = new Vue({
     el: ".robot",
     data: robot
+});
+
+var controlView = new Vue({
+    el: ".controlBoard",
+    data: script.control,
+    methods: {
+        play: function () {
+            script.play();
+        },
+        pause: function () {
+            script.pause();
+        },
+        clear: function () {
+            script.clear();
+        },
+        stop: function () {
+            script.stop();
+        }
+    }
+});
+
+var availableActionsView = new Vue({
+    el: ".availableActions",
+    data: availableActions,
+    methods: {
+        add: function (action) {
+            script.add(action);
+        }
+    }
 });

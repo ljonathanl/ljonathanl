@@ -157,7 +157,18 @@
 			</div>
 		</div>
 		<div class="scriptContainer">
-			
+			<div class="controlBoard">
+				<button class="control play" v-on="click: play" v-show="!playing"></button>
+				<button class="control pause" v-on="click: pause" v-show="playing"></button>
+				<button class="control stop" v-on="click: stop"></button>
+				<button class="control clear" v-on="click: clear"></button>
+			</div>
+			<div class="availableActions">
+				<button v-repeat="action: actions" 
+					class="action {{action.name}}"
+					v-on="click: add(action)">
+				</button>
+			</div>
 		</div>	
 		
 		<script type="text/javascript" src="index.js"></script>

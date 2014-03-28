@@ -6,33 +6,6 @@ module robotcode {
 		grid: string[];
 	}
 
-
-	export function createGrid(gridValue:GridValue):Grid {
-		var grid = new Grid();
-		grid.width = gridValue.grid[0].length;
-		grid.height = gridValue.grid.length;
-
-		var cells:Cell[][] = [];
-		for (var i = 0; i < grid.width; ++i) {
-			cells[i] = [];
-			var row = gridValue.grid[0]
-			for (var j = 0; j < grid.height; ++j) {
-				var cell = new Cell();
-				cell.color = gridValue.colors[gridValue.grid[j][i]];
-				cells[i][j] = cell;
-			}
-		}		
-		grid.cells = cells;
-		return grid;
-	}
-
-	export function canMove(grid:Grid, x:number, y:number):boolean {
-		if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
-			return grid.cells[x][y].color != "#000000";
-		}
-		return false;
-	}
-
 	export class Cell {
 		public color:string;
 	};
@@ -54,8 +27,55 @@ module robotcode {
 	};
 
 	export class Action {
-		constructor(public name:string, public act:(world:World, callback:()=>void)=>void){}
+		constructor(public name:string){}
 	};
+
+	export class Control {
+		playing:boolean;
+	}
+
+	export class AvailableActions {
+		actions: Action[] = [];
+	};	
+
+	export var mapActions:{[key:string]:(world:robotcode.World, callback:()=>void)=>void} = {};
+
+	export function setCellColor(grid:Grid, x:number, y:number, color:string) {
+		var cell = grid.cells[y][x];
+		if (cell) {
+			cell.color = color;
+		}
+	}
+
+
+
+	export function createGrid(gridValue:GridValue):Grid {
+		var grid = new Grid();
+		grid.width = gridValue.grid[0].length;
+		grid.height = gridValue.grid.length;
+
+		var cells:Cell[][] = [];
+		for (var j = 0; j < grid.height; ++j) {
+			cells[j] = [];
+			var row = gridValue.grid[0]
+			for (var i = 0; i < grid.width; ++i) {
+				var cell = new Cell();
+				cell.color = gridValue.colors[gridValue.grid[j][i]];
+				cells[j][i] = cell;
+			}
+		}		
+		grid.cells = cells;
+		return grid;
+	}
+
+	export function canMove(grid:Grid, x:number, y:number):boolean {
+		if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
+			return grid.cells[y][x].color != "#000000";
+		}
+		return false;
+	}
+
+
 
 	export class Script {
 		actions:Action[] = [];
@@ -63,18 +83,15 @@ module robotcode {
 		isPaused:boolean = true;
 		view: HTMLDivElement;
 		actionsView: HTMLDivElement;
-		playButton: HTMLButtonElement;
-		pauseButton: HTMLButtonElement;
+		control:Control;
 		constructor(public world:World) {
 			this.createView();
+			this.control = new Control();
 		}
 		private createView() {
 			var div:HTMLDivElement = document.createElement("div");
 			div.className = "script";
 			this.view = div;
-			var control:HTMLDivElement = document.createElement("div");
-			control.className = "controlBoard";
-			div.appendChild(control);
 			var actions:HTMLDivElement = document.createElement("div");
 			actions.className = "actions";
 			div.appendChild(actions);
@@ -83,32 +100,6 @@ module robotcode {
 			placeHolder.className = "action placeholder";
 			new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
 			var playButton:HTMLButtonElement = document.createElement("button");
-			playButton.className = "control play";
-			playButton.onclick = () => {
-				this.play();
-			};
-			control.appendChild(playButton);
-			this.playButton = playButton;
-			var pauseButton:HTMLButtonElement = document.createElement("button");
-			pauseButton.className = "control pause";
-			pauseButton.onclick = () => {
-				this.pause();
-			};
-			control.appendChild(pauseButton);
-			pauseButton.style.display = "none";
-			this.pauseButton = pauseButton;
-			var stopButton:HTMLButtonElement = document.createElement("button");
-			stopButton.className = "control stop";
-			stopButton.onclick = () => {
-				this.stop();
-			};
-			control.appendChild(stopButton);	
-			var clearButton:HTMLButtonElement = document.createElement("button");
-			clearButton.className = "control clear";
-			clearButton.onclick = () => {
-				this.clear();
-			};
-			control.appendChild(clearButton);
 		}
 		private addActionView(action:Action) {
 			var button:HTMLButtonElement = document.createElement("button");
@@ -128,15 +119,13 @@ module robotcode {
 		}
 		play() {
 			this.isPaused = false;
-			this.playButton.style.display = "none";
-			this.pauseButton.style.display = "inline";
+			this.control.playing = true;
 			this.next();
 			return this;
 		}
 		pause() {
 			this.isPaused = true;
-			this.playButton.style.display = "inline";
-			this.pauseButton.style.display = "none";
+			this.control.playing = false;
 			return this;
 		}
 		stop() {
@@ -163,37 +152,13 @@ module robotcode {
 					if (this.currentIndex == 0) {
 						this.pause();
 					}
-					action.act(this.world, this.next);
+					mapActions[action.name](this.world, this.next);
 				}
 
 			}
 		}
 	};
 
-	export class AvailableActions {
-		actions: Action[] = [];
-		view:HTMLDivElement;
-		constructor(public script:Script) {
-			this.createView();
-		}
-		add(action:Action) {
-			this.actions.push(action);
-			this.addActionView(action);
-			return this;
-		}
-		private createView() {
-			var div = document.createElement("div");
-			div.className = "availableActions";
-			this.view = div;
-		}
-		private addActionView(action:Action) {
-			var button:HTMLButtonElement = document.createElement("button");
-			button.className = "action " + action.name;
-			button.onclick = () => {
-				this.script.add(action);
-			};
-			this.view.appendChild(button);
-		}
-	};	
+	
 
 }
