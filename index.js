@@ -132,12 +132,23 @@ var robotcode;
     robotcode.Action = Action;
     ;
 
+    var ActionInstance = (function () {
+        function ActionInstance(action) {
+            this.action = action;
+            this.executing = false;
+        }
+        return ActionInstance;
+    })();
+    robotcode.ActionInstance = ActionInstance;
+    ;
+
     var Control = (function () {
         function Control() {
         }
         return Control;
     })();
     robotcode.Control = Control;
+    ;
 
     var AvailableActions = (function () {
         function AvailableActions() {
@@ -196,45 +207,34 @@ var robotcode;
             this.next = function () {
                 if (!_this.isPaused) {
                     if (_this.currentIndex >= 0 && _this.currentIndex < _this.actions.length) {
-                        var currentActionView = _this.actionsView.querySelector(".executing");
-                        if (currentActionView)
-                            currentActionView.classList.remove("executing");
-                        currentActionView = _this.actionsView.childNodes.item(_this.currentIndex);
-                        currentActionView.className += " executing";
-                        var action = _this.actions[_this.currentIndex];
+                        if (_this.currentActionInstance)
+                            _this.currentActionInstance.executing = false;
+                        _this.currentActionInstance = _this.actions[_this.currentIndex];
+                        _this.currentActionInstance.executing = true;
                         _this.currentIndex = (_this.currentIndex + 1) % _this.actions.length;
                         if (_this.currentIndex == 0) {
                             _this.pause();
                         }
-                        robotcode.mapActions[action.name](_this.world, _this.next);
+                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.world, _this.next);
                     }
                 }
             };
-            this.createView();
             this.control = new Control();
         }
-        Script.prototype.createView = function () {
-            var div = document.createElement("div");
-            div.className = "script";
-            this.view = div;
-            var actions = document.createElement("div");
-            actions.className = "actions";
-            div.appendChild(actions);
-            this.actionsView = actions;
-            var placeHolder = document.createElement("div");
-            placeHolder.className = "action placeholder";
-            new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
-            var playButton = document.createElement("button");
-        };
-        Script.prototype.addActionView = function (action) {
-            var button = document.createElement("button");
-            button.className = "action " + action.name;
-            button.draggable = true;
-            this.actionsView.appendChild(button);
-        };
+        /*		private createView() {
+        var div:HTMLDivElement = document.createElement("div");
+        div.className = "script";
+        this.view = div;
+        var actions:HTMLDivElement = document.createElement("div");
+        actions.className = "actions";
+        div.appendChild(actions);
+        this.actionsView = actions;
+        var placeHolder:HTMLDivElement = document.createElement("div");
+        placeHolder.className = "action placeholder";
+        new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
+        }*/
         Script.prototype.add = function (action) {
-            this.actions.push(action);
-            this.addActionView(action);
+            this.actions.push(new ActionInstance(action));
             return this;
         };
         Script.prototype.move = function (lastIndex, newIndex) {
@@ -258,10 +258,7 @@ var robotcode;
             return this.pause();
         };
         Script.prototype.clear = function () {
-            this.actions.length = 0;
-            while (this.actionsView.lastChild) {
-                this.actionsView.removeChild(this.actionsView.lastChild);
-            }
+            this.actions.splice(0, this.actions.length);
             return this.stop();
         };
         return Script;
@@ -352,10 +349,6 @@ var availableActions = new robotcode.AvailableActions();
 
 availableActions.actions = [actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen];
 
-var scriptContainer = document.querySelector(".scriptContainer");
-
-scriptContainer.appendChild(script.view);
-
 var gridView = new Vue({
     el: ".grid",
     data: grid
@@ -393,4 +386,17 @@ var availableActionsView = new Vue({
             script.add(action);
         }
     }
+});
+
+var scriptView = new Vue({
+    el: ".script",
+    data: {
+        actions: script.actions
+    }
+});
+
+var placeHolder = document.createElement("div");
+placeHolder.className = "action placeholder";
+new DomUtil.DnDContainerBehavior(document.querySelector(".script"), placeHolder, function (lastIndex, newIndex) {
+    script.move(lastIndex, newIndex);
 });

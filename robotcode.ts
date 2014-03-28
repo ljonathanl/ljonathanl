@@ -30,9 +30,14 @@ module robotcode {
 		constructor(public name:string){}
 	};
 
+	export class ActionInstance {
+		executing:boolean = false;
+		constructor(public action:Action){}
+	};
+
 	export class Control {
 		playing:boolean;
-	}
+	};
 
 	export class AvailableActions {
 		actions: Action[] = [];
@@ -78,17 +83,15 @@ module robotcode {
 
 
 	export class Script {
-		actions:Action[] = [];
+		actions:ActionInstance[] = [];
 		currentIndex:number = 0;
+		currentActionInstance:ActionInstance;
 		isPaused:boolean = true;
-		view: HTMLDivElement;
-		actionsView: HTMLDivElement;
 		control:Control;
 		constructor(public world:World) {
-			this.createView();
 			this.control = new Control();
 		}
-		private createView() {
+/*		private createView() {
 			var div:HTMLDivElement = document.createElement("div");
 			div.className = "script";
 			this.view = div;
@@ -99,21 +102,13 @@ module robotcode {
 			var placeHolder:HTMLDivElement = document.createElement("div");
 			placeHolder.className = "action placeholder";
 			new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
-			var playButton:HTMLButtonElement = document.createElement("button");
-		}
-		private addActionView(action:Action) {
-			var button:HTMLButtonElement = document.createElement("button");
-			button.className = "action " + action.name;
-			button.draggable = true;
-			this.actionsView.appendChild(button);
-		}
+		}*/
 		add(action:Action) {
-			this.actions.push(action);
-			this.addActionView(action);
+			this.actions.push(new ActionInstance(action));
 			return this;
 		}
 		move(lastIndex:number, newIndex:number) {
-			var action:Action = this.actions[lastIndex];
+			var action:ActionInstance = this.actions[lastIndex];
 			this.actions.splice(lastIndex, 1);
 			this.actions.splice(newIndex, 0, action);
 		}
@@ -133,26 +128,21 @@ module robotcode {
 			return this.pause();
 		}
 		clear() {
-			this.actions.length = 0;
-			while (this.actionsView.lastChild) {
-				this.actionsView.removeChild(this.actionsView.lastChild);
-			}
+			this.actions.splice(0, this.actions.length);
 			return this.stop();
 		}
 
 		private next = () => {
 			if (!this.isPaused) {
 				if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
-					var currentActionView = <HTMLButtonElement>this.actionsView.querySelector(".executing");
-					if (currentActionView) currentActionView.classList.remove("executing");
-					currentActionView = <HTMLButtonElement>this.actionsView.childNodes.item(this.currentIndex);
-					currentActionView.className += " executing"; 
-					var action = this.actions[this.currentIndex];
+					if (this.currentActionInstance) this.currentActionInstance.executing = false;
+					this.currentActionInstance = this.actions[this.currentIndex];
+					this.currentActionInstance.executing = true;
 					this.currentIndex = (this.currentIndex + 1) % this.actions.length;
 					if (this.currentIndex == 0) {
 						this.pause();
 					}
-					mapActions[action.name](this.world, this.next);
+					mapActions[this.currentActionInstance.action.name](this.world, this.next);
 				}
 
 			}

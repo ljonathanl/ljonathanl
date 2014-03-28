@@ -165,8 +165,16 @@
 			</div>
 			<div class="availableActions">
 				<button v-repeat="action: actions" 
-					class="action {{action.name}}"
+					class="action"
+					v-class="action.name"
 					v-on="click: add(action)">
+				</button>
+			</div>
+			<div class="script">
+				<button v-repeat="actionInstance: actions"
+					class="action"
+					v-class="actionInstance.action.name, executing: actionInstance.executing"
+					draggable="true">
 				</button>
 			</div>
 		</div>	

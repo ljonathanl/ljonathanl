@@ -24,9 +24,6 @@ var gridValue = {
 	]
 }
 
-
-
-
 var grid = robotcode.createGrid(gridValue);
 var robot = new robotcode.Robot();
 
@@ -36,10 +33,6 @@ var availableActions = new robotcode.AvailableActions();
 
 
 availableActions.actions = [actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen];
-
-var scriptContainer = document.querySelector(".scriptContainer");
-
-scriptContainer.appendChild(script.view);
 
 var gridView = new Vue({
 	el: ".grid",
@@ -79,3 +72,19 @@ var availableActionsView = new Vue({
 		},
 	}
 });
+
+var scriptView = new Vue({
+	el: ".script",
+	data: {
+		actions: script.actions
+	}
+});
+
+
+var placeHolder:HTMLDivElement = document.createElement("div");
+placeHolder.className = "action placeholder";
+new DomUtil.DnDContainerBehavior(
+	document.querySelector(".script"), 
+	placeHolder, (lastIndex:number, newIndex:number) => {
+		script.move(lastIndex, newIndex);
+	});
