@@ -162,7 +162,7 @@ var robotcode;
     robotcode.mapActions = {};
 
     function setCellColor(grid, x, y, color) {
-        var cell = grid.cells[y][x];
+        var cell = grid.cells[x][y];
         if (cell) {
             cell.color = color;
         }
@@ -175,13 +175,12 @@ var robotcode;
         grid.height = gridValue.grid.length;
 
         var cells = [];
-        for (var j = 0; j < grid.height; ++j) {
-            cells[j] = [];
-            var row = gridValue.grid[0];
-            for (var i = 0; i < grid.width; ++i) {
+        for (var i = 0; i < grid.width; ++i) {
+            cells[i] = [];
+            for (var j = 0; j < grid.height; ++j) {
                 var cell = new Cell();
                 cell.color = gridValue.colors[gridValue.grid[j][i]];
-                cells[j][i] = cell;
+                cells[i][j] = cell;
             }
         }
         grid.cells = cells;
@@ -191,7 +190,7 @@ var robotcode;
 
     function canMove(grid, x, y) {
         if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
-            return grid.cells[y][x].color != "#000000";
+            return grid.cells[x][y].color != "#000000";
         }
         return false;
     }
@@ -308,6 +307,7 @@ var actions;
 })(actions || (actions = {}));
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
+
 var gridValue = {
     colors: {
         "B": "#000000",
@@ -328,6 +328,18 @@ var gridValue = {
     ]
 };
 
+var iterate = function (begin, end) {
+    var offset = begin > end ? end : begin;
+    var delta = Math.abs(end - begin);
+
+    var result = [];
+    for (var i = 0; i < delta; i++) {
+        result.push(i + offset);
+    }
+    ;
+    return result;
+};
+
 var grid = robotcode.createGrid(gridValue);
 var robot = new robotcode.Robot();
 
@@ -337,7 +349,10 @@ var availableActions = new robotcode.AvailableActions([actions.up, actions.down,
 
 var gridView = new Vue({
     el: ".grid",
-    data: grid
+    data: grid,
+    methods: {
+        iterate: iterate
+    }
 });
 
 var robotView = new Vue({
@@ -381,8 +396,18 @@ var scriptView = new Vue({
     }
 });
 
-var placeHolder = document.createElement("div");
+/*var placeHolder:HTMLDivElement = document.createElement("div");
 placeHolder.className = "action placeholder";
-new DomUtil.DnDContainerBehavior(document.querySelector(".script"), placeHolder, function (lastIndex, newIndex) {
-    script.move(lastIndex, newIndex);
+new DomUtil.DnDContainerBehavior(
+document.querySelector(".script"),
+placeHolder, (lastIndex:number, newIndex:number) => {
+script.move(lastIndex, newIndex);
+});*/
+var sort = new Sortable(document.querySelector(".script"), {
+    // handle: ".tile__title", // Restricts sort start click/touch to the specified element
+    draggable: ".action",
+    ghostClass: "placeholder",
+    onUpdate: function (evt /**Event*/ ) {
+        console.log(evt);
+    }
 });

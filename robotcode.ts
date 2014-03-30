@@ -46,7 +46,7 @@ module robotcode {
 	export var mapActions:{[key:string]:(world:robotcode.World, callback:()=>void)=>void} = {};
 
 	export function setCellColor(grid:Grid, x:number, y:number, color:string) {
-		var cell = grid.cells[y][x];
+		var cell = grid.cells[x][y];
 		if (cell) {
 			cell.color = color;
 		}
@@ -60,13 +60,12 @@ module robotcode {
 		grid.height = gridValue.grid.length;
 
 		var cells:Cell[][] = [];
-		for (var j = 0; j < grid.height; ++j) {
-			cells[j] = [];
-			var row = gridValue.grid[0]
-			for (var i = 0; i < grid.width; ++i) {
+		for (var i = 0; i < grid.width; ++i) {
+			cells[i] = [];
+			for (var j = 0; j < grid.height; ++j) {
 				var cell = new Cell();
 				cell.color = gridValue.colors[gridValue.grid[j][i]];
-				cells[j][i] = cell;
+				cells[i][j] = cell;
 			}
 		}		
 		grid.cells = cells;
@@ -75,7 +74,7 @@ module robotcode {
 
 	export function canMove(grid:Grid, x:number, y:number):boolean {
 		if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
-			return grid.cells[y][x].color != "#000000";
+			return grid.cells[x][y].color != "#000000";
 		}
 		return false;
 	}

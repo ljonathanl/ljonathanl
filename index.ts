@@ -2,6 +2,7 @@
 /// <reference path="actions.ts" />
 
 declare var Vue:any;
+declare var Sortable:any;
 var gridValue = {
 	colors: 
 	{ 
@@ -24,6 +25,17 @@ var gridValue = {
 	]
 }
 
+var iterate = function(begin:number, end:number) {
+	var offset = begin > end ? end : begin;
+    var delta = Math.abs(end - begin);
+
+    var result = [];
+    for (var i = 0; i < delta; i++) {
+        result.push(i + offset);
+    };
+    return result;
+}
+
 var grid = robotcode.createGrid(gridValue);
 var robot = new robotcode.Robot();
 
@@ -33,7 +45,10 @@ var availableActions = new robotcode.AvailableActions([actions.up, actions.down,
 
 var gridView = new Vue({
 	el: ".grid",
-	data: grid
+	data: grid,
+	methods: {
+		iterate: iterate
+	}
 });
 
 var robotView = new Vue({
@@ -78,10 +93,20 @@ var scriptView = new Vue({
 });
 
 
-var placeHolder:HTMLDivElement = document.createElement("div");
+/*var placeHolder:HTMLDivElement = document.createElement("div");
 placeHolder.className = "action placeholder";
 new DomUtil.DnDContainerBehavior(
 	document.querySelector(".script"), 
 	placeHolder, (lastIndex:number, newIndex:number) => {
 		script.move(lastIndex, newIndex);
-	});
+	});*/
+
+
+var sort = new Sortable(document.querySelector(".script"), {
+ // handle: ".tile__title", // Restricts sort start click/touch to the specified element
+  draggable: ".action", // Specifies which items inside the element should be sortable
+  ghostClass: "placeholder",
+  onUpdate: function (evt/**Event*/){
+  	console.log(evt);
+  }
+});
