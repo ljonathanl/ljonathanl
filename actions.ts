@@ -36,12 +36,12 @@ module actions {
 		}
 	};
 
-	export var up = new robotcode.Action("up");
-	export var down = new robotcode.Action("down");
-	export var left = new robotcode.Action("left");
-	export var right = new robotcode.Action("right");
-	export var colorRed = new robotcode.Action("colorRed");
-	export var colorGreen = new robotcode.Action("colorGreen");
+	export var up = new robotcode.Action("up", "move up");
+	export var down = new robotcode.Action("down", "move down");
+	export var left = new robotcode.Action("left", "move left");
+	export var right = new robotcode.Action("right", "move right");
+	export var colorRed = new robotcode.Action("colorRed", "color tile in red");
+	export var colorGreen = new robotcode.Action("colorGreen", "color tile in green");
 
 	robotcode.mapActions[up.name] = move(0, -1, -90);
 	robotcode.mapActions[down.name] = move(0, 1, 90);

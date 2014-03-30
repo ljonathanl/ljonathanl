@@ -27,7 +27,7 @@ module robotcode {
 	};
 
 	export class Action {
-		constructor(public name:string){}
+		constructor(public name:string, public description:string){}
 	};
 
 	export class ActionInstance {

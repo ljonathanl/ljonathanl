@@ -124,8 +124,9 @@ var robotcode;
     ;
 
     var Action = (function () {
-        function Action(name) {
+        function Action(name, description) {
             this.name = name;
+            this.description = description;
         }
         return Action;
     })();
@@ -295,12 +296,12 @@ var actions;
         };
     };
 
-    actions.up = new robotcode.Action("up");
-    actions.down = new robotcode.Action("down");
-    actions.left = new robotcode.Action("left");
-    actions.right = new robotcode.Action("right");
-    actions.colorRed = new robotcode.Action("colorRed");
-    actions.colorGreen = new robotcode.Action("colorGreen");
+    actions.up = new robotcode.Action("up", "move up");
+    actions.down = new robotcode.Action("down", "move down");
+    actions.left = new robotcode.Action("left", "move left");
+    actions.right = new robotcode.Action("right", "move right");
+    actions.colorRed = new robotcode.Action("colorRed", "color tile in red");
+    actions.colorGreen = new robotcode.Action("colorGreen", "color tile in green");
 
     robotcode.mapActions[actions.up.name] = move(0, -1, -90);
     robotcode.mapActions[actions.down.name] = move(0, 1, 90);

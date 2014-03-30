@@ -185,12 +185,14 @@
 				<button v-repeat="action: actions" 
 					class="action"
 					v-class="action.name"
+					v-attr="title: action.description"
 					v-on="click: add(action)">
 				</button>
 			</div>
 			<div class="script">
 				<button v-repeat="actionInstance: actions"
 					class="action"
+					v-attr="title: actionInstance.action.description"
 					v-class="
 						actionInstance.action.name, 
 						executing: actionInstance.executing
