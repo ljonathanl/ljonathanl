@@ -203,6 +203,9 @@ var robotcode;
             this.actions = [];
             this.currentIndex = 0;
             this.isPaused = true;
+            this.end = function () {
+                _this.stop();
+            };
             this.next = function () {
                 if (!_this.isPaused) {
                     if (_this.currentIndex >= 0 && _this.currentIndex < _this.actions.length) {
@@ -210,11 +213,10 @@ var robotcode;
                             _this.currentActionInstance.executing = false;
                         _this.currentActionInstance = _this.actions[_this.currentIndex];
                         _this.currentActionInstance.executing = true;
-                        _this.currentIndex = (_this.currentIndex + 1) % _this.actions.length;
-                        if (_this.currentIndex == 0) {
-                            _this.pause();
-                        }
-                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.world, _this.next);
+                        _this.currentIndex++;
+                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.world, _this.currentIndex < _this.actions.length ? _this.next : _this.end);
+                    } else {
+                        _this.end();
                     }
                 }
             };
@@ -242,6 +244,8 @@ var robotcode;
         };
         Script.prototype.stop = function () {
             this.currentIndex = 0;
+            if (this.currentActionInstance)
+                this.currentActionInstance.executing = false;
             return this.pause();
         };
         Script.prototype.clear = function () {
@@ -409,7 +413,6 @@ var sort = new Sortable(document.querySelector(".script"), {
     draggable: ".action",
     ghostClass: "placeholder",
     onUpdate: function (evt /**Event*/ ) {
-        console.log(evt.item.vue_vm);
         script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
     }
 });

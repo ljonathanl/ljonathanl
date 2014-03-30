@@ -112,26 +112,29 @@ module robotcode {
 		}
 		stop() {
 			this.currentIndex = 0;
+			if (this.currentActionInstance) this.currentActionInstance.executing = false;
 			return this.pause();
 		}
 		clear() {
 			this.actions.splice(0, this.actions.length);
 			return this.stop();
 		}
-
+		private end = () => {
+			this.stop();
+		}
 		private next = () => {
 			if (!this.isPaused) {
 				if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
 					if (this.currentActionInstance) this.currentActionInstance.executing = false;
 					this.currentActionInstance = this.actions[this.currentIndex];
 					this.currentActionInstance.executing = true;
-					this.currentIndex = (this.currentIndex + 1) % this.actions.length;
-					if (this.currentIndex == 0) {
-						this.pause();
-					}
-					mapActions[this.currentActionInstance.action.name](this.world, this.next);
+					this.currentIndex++;
+					mapActions[this.currentActionInstance.action.name](
+						this.world, 
+						this.currentIndex < this.actions.length ? this.next : this.end);
+				} else {
+					this.end();
 				}
-
 			}
 		}
 	};
