@@ -224,8 +224,8 @@ var robotcode;
             this.actions.push(new ActionInstance(action));
             return this;
         };
-        Script.prototype.move = function (lastIndex, newIndex) {
-            var action = this.actions[lastIndex];
+        Script.prototype.move = function (action, newIndex) {
+            var lastIndex = this.actions.indexOf(action);
             this.actions.splice(lastIndex, 1);
             this.actions.splice(newIndex, 0, action);
         };
@@ -307,6 +307,7 @@ var actions;
 })(actions || (actions = {}));
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
+/// <reference path="util.ts" />
 
 var gridValue = {
     colors: {
@@ -328,7 +329,7 @@ var gridValue = {
     ]
 };
 
-var iterate = function (begin, end) {
+var range = function (begin, end) {
     var offset = begin > end ? end : begin;
     var delta = Math.abs(end - begin);
 
@@ -351,7 +352,7 @@ var gridView = new Vue({
     el: ".grid",
     data: grid,
     methods: {
-        iterate: iterate
+        range: range
     }
 });
 
@@ -408,6 +409,7 @@ var sort = new Sortable(document.querySelector(".script"), {
     draggable: ".action",
     ghostClass: "placeholder",
     onUpdate: function (evt /**Event*/ ) {
-        console.log(evt);
+        console.log(evt.item.vue_vm);
+        script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
     }
 });

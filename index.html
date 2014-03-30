@@ -142,8 +142,8 @@
 	<body>
 		<div class="gridContainer">
 			<table class="grid">
-				<tr v-repeat="j: iterate(0, height)">
-					<td v-repeat="i: iterate(0, width)">
+				<tr v-repeat="j: range(0, height)">
+					<td v-repeat="i: range(0, width)">
 						<div 
 							class="cell" 
 							v-style="background-color: cells[i][j].color">

@@ -1,5 +1,6 @@
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
+/// <reference path="util.ts" />
 
 declare var Vue:any;
 declare var Sortable:any;
@@ -25,7 +26,7 @@ var gridValue = {
 	]
 }
 
-var iterate = function(begin:number, end:number) {
+var range = function(begin:number, end:number) {
 	var offset = begin > end ? end : begin;
     var delta = Math.abs(end - begin);
 
@@ -47,7 +48,7 @@ var gridView = new Vue({
 	el: ".grid",
 	data: grid,
 	methods: {
-		iterate: iterate
+		range: range
 	}
 });
 
@@ -106,7 +107,7 @@ var sort = new Sortable(document.querySelector(".script"), {
  // handle: ".tile__title", // Restricts sort start click/touch to the specified element
   draggable: ".action", // Specifies which items inside the element should be sortable
   ghostClass: "placeholder",
-  onUpdate: function (evt/**Event*/){
-  	console.log(evt);
+  onUpdate: function (evt:any/**Event*/){
+  	script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
   }
 });

@@ -94,8 +94,8 @@ module robotcode {
 			this.actions.push(new ActionInstance(action));
 			return this;
 		}
-		move(lastIndex:number, newIndex:number) {
-			var action:ActionInstance = this.actions[lastIndex];
+		move(action:ActionInstance, newIndex:number) {
+			var lastIndex = this.actions.indexOf(action);
 			this.actions.splice(lastIndex, 1);
 			this.actions.splice(newIndex, 0, action);
 		}

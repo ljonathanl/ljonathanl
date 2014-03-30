@@ -15,15 +15,15 @@
 				{{$value}}
 			</div>
 		</div>
-		<!-- <table id="grid">
+		<table id="grid">
 			<tr v-repeat="line: cells">
 				<td v-repeat="cell: line">
 					{{cell}}
 				</td>
 			</tr>
-		</table> -->
+		</table>
 		<script type="text/javascript">
-			/*var grid = new Vue({
+			var grid = new Vue({
 				el: "#grid",
 				data: {
 					cells: [
@@ -32,7 +32,7 @@
 						["20", "21", "22", "23"],
 					]
 				}
-			});*/
+			});
 
 			var loop = new Vue({
 				el: "#loop",
@@ -44,13 +44,12 @@
 				methods: {
 					iterate: function(begin, end) {
 						var offset = begin > end ? end : begin;
-		                var delta = Math.abs(end - begin);
-
-		                var result = [];
-		                for (var i = 0; i <= delta; i++) {
-		                    result.push(i + offset);
-		                };
-		                return result;
+						var delta = Math.abs(end - begin);
+						var result = [];
+						for (var i = 0; i <= delta; i++) {
+							result.push(i + offset);
+						};
+						return result;
 					}
 				}
 			}) 
