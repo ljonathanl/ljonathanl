@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<title>RobotCode</title>
+
+		<style type="text/css">
+
+
+		</style>
+
+		<script type="text/javascript" src="lib/vue2.js"></script>
+	</head>
+	<body>
+		<div id="loop">
+			<div v-repeat="iterate(begin, end)">
+				{{$value}}
+			</div>
+		</div>
+		<table id="grid">
+			<tr v-repeat="line: cells">
+				<td v-repeat="cell: line">
+					{{cell}}
+				</td>
+			</tr>
+		</table>
+		<script type="text/javascript">
+			var grid = new Vue({
+				el: "#grid",
+				data: {
+					cells: [
+						["00", "01", "02", "03"],
+						["10", "11", "12", "13"],
+						["20", "21", "22", "23"],
+					]
+				}
+			});
+
+			var loop = new Vue({
+				el: "#loop",
+				data: {
+					begin: 2,
+					end: 5,
+					a: ["a", "b", "c" , "d", "e", "f"]
+				},
+				methods: {
+					iterate: function(begin, end) {
+						var offset = begin > end ? end : begin;
+						var delta = Math.abs(end - begin);
+						var result = [];
+						for (var i = 0; i <= delta; i++) {
+							result.push(i + offset);
+						};
+						return result;
+					}
+				}
+			}) 
+		</script>
+	</body>
+</html>

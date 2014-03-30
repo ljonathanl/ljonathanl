@@ -7,109 +7,19 @@ module robotcode {
 	}
 
 	export class Cell {
-		view:HTMLDivElement;
-		private _color:string;
-		constructor() {
-			this.createView();
-		}
-		private createView() {
-			var div = document.createElement("div");
-			div.className = "cell";
-			this.view = div;
-		}
-		set color(value:string) {
-			this.view.style.backgroundColor = value;
-			this._color = value;
-		}
-		get color():string {
-			return this._color;
-		}
+		public color:string;
 	};
 
 	export class Grid {
-		view:HTMLDivElement;
 		cells:Cell[][];
 		width:number;
 		height:number;
-		constructor(public gridValue:GridValue) {
-			this.width = gridValue.grid[0].length;
-			this.height = gridValue.grid.length;
-
-			var cells:Cell[][] = [];
-			for (var i = 0; i < this.width; ++i) {
-				cells[i] = [];
-				var row = gridValue.grid[0]
-				for (var j = 0; j < this.height; ++j) {
-					var cell = new Cell();
-					cell.color = gridValue.colors[gridValue.grid[j][i]];
-					cells[i][j] = cell;
-				}
-			}		
-			this.cells = cells;
-			this.createView();
-		}
-		private createView() {
-			var div = document.createElement("div");
-			var table = document.createElement("table");
-			for (var j = 0; j < this.height; ++j) {
-				var row = document.createElement("tr");
-				for (var i = 0; i < this.width; ++i) {
-					var td = document.createElement("td");
-					td.appendChild(this.cells[i][j].view);
-					row.appendChild(td);
-				}
-				table.appendChild(row);		
-			}
-			div.appendChild(table);
-			div.className = "grid";
-			this.view = div;
-		}
-		canMove(x:number, y:number):boolean {
-			if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-				return this.cells[x][y].color != "#000000";
-			}
-			return false;
-		}  
 	};
 
 	export class Robot {
-		private _x:number;
-		private _y:number;
-		private _angle:number;
-		view:HTMLDivElement;
-		constructor() {
-			this.createView();
-			this.x = 0;
-			this.y = 0;
-			this.angle = 0;
-		}
-		private createView() {
-			var div = document.createElement("div");
-			div.className = "robot";
-			this.view = div;
-		}
-		set x(value:number) {
-			this._x = value;
-			this.view.style.left = value * 60 + "px";
-		}
-		get x() {
-			return this._x;
-		}
-		set y(value:number) {
-			this._y = value;
-			this.view.style.top = value * 60 + "px";
-		}
-		get y() {
-			return this._y;
-		}
-		set angle(value:number) {
-			this._angle = value;
-			this.view.style["webkitTransform"] = "rotate(" + value + "deg)";
-		}
-		get angle() {
-			return this._angle;
-		}
-		
+		x = 0;
+		y = 0;
+		angle = 0;
 	};
 
 	export class World {
@@ -117,149 +27,119 @@ module robotcode {
 	};
 
 	export class Action {
-		constructor(public name:string, public act:(world:World, callback:()=>void)=>void){}
+		constructor(public name:string, public description:string){}
 	};
 
+	export class ActionInstance {
+		executing:boolean = false;
+		constructor(public action:Action){}
+	};
+
+	export class Control {
+		playing:boolean;
+	};
+
+	export class AvailableActions {
+		constructor(public actions:Action[]){}
+	};	
+
+	export var mapActions:{[key:string]:(world:robotcode.World, callback:()=>void)=>void} = {};
+
+	export function setCellColor(grid:Grid, x:number, y:number, color:string) {
+		var cell = grid.cells[x][y];
+		if (cell) {
+			cell.color = color;
+		}
+	}
+
+
+
+	export function createGrid(gridValue:GridValue):Grid {
+		var grid = new Grid();
+		grid.width = gridValue.grid[0].length;
+		grid.height = gridValue.grid.length;
+
+		var cells:Cell[][] = [];
+		for (var i = 0; i < grid.width; ++i) {
+			cells[i] = [];
+			for (var j = 0; j < grid.height; ++j) {
+				var cell = new Cell();
+				cell.color = gridValue.colors[gridValue.grid[j][i]];
+				cells[i][j] = cell;
+			}
+		}		
+		grid.cells = cells;
+		return grid;
+	}
+
+	export function canMove(grid:Grid, x:number, y:number):boolean {
+		if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
+			return grid.cells[x][y].color != "#000000";
+		}
+		return false;
+	}
+
+
+
 	export class Script {
-		actions:Action[] = [];
+		actions:ActionInstance[] = [];
 		currentIndex:number = 0;
+		currentActionInstance:ActionInstance;
 		isPaused:boolean = true;
-		view: HTMLDivElement;
-		actionsView: HTMLDivElement;
-		playButton: HTMLButtonElement;
-		pauseButton: HTMLButtonElement;
+		control:Control;
 		constructor(public world:World) {
-			this.createView();
-		}
-		private createView() {
-			var div:HTMLDivElement = document.createElement("div");
-			div.className = "script";
-			this.view = div;
-			var control:HTMLDivElement = document.createElement("div");
-			control.className = "controlBoard";
-			div.appendChild(control);
-			var actions:HTMLDivElement = document.createElement("div");
-			actions.className = "actions";
-			div.appendChild(actions);
-			this.actionsView = actions;
-			var placeHolder:HTMLDivElement = document.createElement("div");
-			placeHolder.className = "action placeholder";
-			new DomUtil.DnDContainerBehavior(actions, placeHolder, this.move.bind(this));
-			var playButton:HTMLButtonElement = document.createElement("button");
-			playButton.className = "control play";
-			playButton.onclick = () => {
-				this.play();
-			};
-			control.appendChild(playButton);
-			this.playButton = playButton;
-			var pauseButton:HTMLButtonElement = document.createElement("button");
-			pauseButton.className = "control pause";
-			pauseButton.onclick = () => {
-				this.pause();
-			};
-			control.appendChild(pauseButton);
-			pauseButton.style.display = "none";
-			this.pauseButton = pauseButton;
-			var stopButton:HTMLButtonElement = document.createElement("button");
-			stopButton.className = "control stop";
-			stopButton.onclick = () => {
-				this.stop();
-			};
-			control.appendChild(stopButton);	
-			var clearButton:HTMLButtonElement = document.createElement("button");
-			clearButton.className = "control clear";
-			clearButton.onclick = () => {
-				this.clear();
-			};
-			control.appendChild(clearButton);
-		}
-		private addActionView(action:Action) {
-			var button:HTMLButtonElement = document.createElement("button");
-			button.className = "action " + action.name;
-			button.draggable = true;
-			this.actionsView.appendChild(button);
+			this.control = new Control();
 		}
 		add(action:Action) {
-			this.actions.push(action);
-			this.addActionView(action);
+			this.actions.push(new ActionInstance(action));
 			return this;
 		}
-		move(lastIndex:number, newIndex:number) {
-			var action:Action = this.actions[lastIndex];
+		move(action:ActionInstance, newIndex:number) {
+			var lastIndex = this.actions.indexOf(action);
 			this.actions.splice(lastIndex, 1);
 			this.actions.splice(newIndex, 0, action);
 		}
 		play() {
 			this.isPaused = false;
-			this.playButton.style.display = "none";
-			this.pauseButton.style.display = "inline";
+			this.control.playing = true;
 			this.next();
 			return this;
 		}
 		pause() {
 			this.isPaused = true;
-			this.playButton.style.display = "inline";
-			this.pauseButton.style.display = "none";
+			this.control.playing = false;
 			return this;
 		}
 		stop() {
 			this.currentIndex = 0;
+			if (this.currentActionInstance) this.currentActionInstance.executing = false;
 			return this.pause();
 		}
 		clear() {
-			this.actions.length = 0;
-			while (this.actionsView.lastChild) {
-				this.actionsView.removeChild(this.actionsView.lastChild);
-			}
-			return this.stop();
+			this.stop();
+			this.actions.splice(0, this.actions.length);
+			return this;
 		}
-		private bindNext = this.next.bind(this);
-
-		private next() {
+		private end = () => {
+			this.stop();
+		}
+		private next = () => {
 			if (!this.isPaused) {
 				if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
-					var currentActionView = <HTMLButtonElement>this.actionsView.querySelector(".executing");
-					if (currentActionView) currentActionView.classList.remove("executing");
-					currentActionView = <HTMLButtonElement>this.actionsView.childNodes.item(this.currentIndex);
-					currentActionView.className += " executing"; 
-					var action = this.actions[this.currentIndex];
-					this.currentIndex = (this.currentIndex + 1) % this.actions.length;
-					if (this.currentIndex == 0) {
-						this.pause();
-					}
-					action.act(this.world, this.bindNext);
+					if (this.currentActionInstance) this.currentActionInstance.executing = false;
+					this.currentActionInstance = this.actions[this.currentIndex];
+					this.currentActionInstance.executing = true;
+					this.currentIndex++;
+					mapActions[this.currentActionInstance.action.name](
+						this.world, 
+						this.currentIndex < this.actions.length ? this.next : this.end);
+				} else {
+					this.end();
 				}
-
 			}
 		}
 	};
 
-	export class AvailableActions {
-		actionsMap: {[key:string]:Action} = {};
-		actions: Action[] = [];
-		view:HTMLDivElement;
-		constructor(public script:Script) {
-			this.createView();
-		}
-		add(action:Action) {
-			this.actionsMap[action.name] = action;
-			this.actions.push(action);
-			this.addActionView(action);
-			return this;
-		}
-		private createView() {
-			var div = document.createElement("div");
-			div.className = "availableActions";
-			this.view = div;
-		}
-		private addActionView(action:Action) {
-			var button:HTMLButtonElement = document.createElement("button");
-			button.className = "action " + action.name;
-			button.onclick = () => {
-				this.script.add(action);
-			};
-			this.view.appendChild(button);
-		}
-	};	
+	
 
 }
