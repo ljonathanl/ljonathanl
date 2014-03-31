@@ -41,7 +41,23 @@ var robot = new robotcode.Robot();
 
 var world = new robotcode.World(robot, grid);
 var script = new robotcode.Script(world);
-var availableActions = new robotcode.AvailableActions([actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen]);
+var availableActions = new robotcode.AvailableActions(
+	[actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen, actions.repeat3Times]);
+
+Vue.directive("sortable", {
+	isEmpty: true,
+	bind: function() {
+		if (!this.el.sortable) {
+			var vm = this.vm;
+			this.el.sortable = new Sortable(this.el, this.vm.$options.sortable);
+		}
+	},
+	unbind: function() {
+		this.el.sortable.destroy();
+		delete this.el.sortable;
+	}
+});
+
 
 var gridView = new Vue({
 	el: ".grid",
@@ -87,6 +103,13 @@ var availableActionsView = new Vue({
 
 var scriptView = new Vue({
 	el: ".script",
+	sortable: {
+		draggable: ".instance",
+		ghostClass: "placeholder",
+		onUpdate: function (evt:any) {
+		  	script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
+		}
+	},
 	data: {
 		actions: script.actions
 	}
@@ -102,11 +125,11 @@ new DomUtil.DnDContainerBehavior(
 	});*/
 
 
-var sort = new Sortable(document.querySelector(".script"), {
+/*var sort = new Sortable(document.querySelector(".script"), {
  // handle: ".tile__title", // Restricts sort start click/touch to the specified element
-  draggable: ".action", // Specifies which items inside the element should be sortable
+  draggable: ".instance", // Specifies which items inside the element should be sortable
   ghostClass: "placeholder",
-  onUpdate: function (evt:any/**Event*/){
+  onUpdate: function (evt:any){
   	script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
   }
-});
+});*/

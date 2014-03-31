@@ -84,6 +84,12 @@ var DomUtil;
     DomUtil.DnDContainerBehavior = DnDContainerBehavior;
 })(DomUtil || (DomUtil = {}));
 /// <reference path="util.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var robotcode;
 (function (robotcode) {
     var Cell = (function () {
@@ -124,9 +130,11 @@ var robotcode;
     ;
 
     var Action = (function () {
-        function Action(name, description) {
+        function Action(name, description, container) {
+            if (typeof container === "undefined") { container = false; }
             this.name = name;
             this.description = description;
+            this.container = container;
         }
         return Action;
     })();
@@ -141,6 +149,15 @@ var robotcode;
         return ActionInstance;
     })();
     robotcode.ActionInstance = ActionInstance;
+    ;
+
+    var ActionContainer = (function () {
+        function ActionContainer() {
+            this.actions = [];
+        }
+        return ActionContainer;
+    })();
+    robotcode.ActionContainer = ActionContainer;
     ;
 
     var Control = (function () {
@@ -162,14 +179,6 @@ var robotcode;
 
     robotcode.mapActions = {};
 
-    function setCellColor(grid, x, y, color) {
-        var cell = grid.cells[x][y];
-        if (cell) {
-            cell.color = color;
-        }
-    }
-    robotcode.setCellColor = setCellColor;
-
     function createGrid(gridValue) {
         var grid = new Grid();
         grid.width = gridValue.grid[0].length;
@@ -189,19 +198,12 @@ var robotcode;
     }
     robotcode.createGrid = createGrid;
 
-    function canMove(grid, x, y) {
-        if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
-            return grid.cells[x][y].color != "#000000";
-        }
-        return false;
-    }
-    robotcode.canMove = canMove;
-
-    var Script = (function () {
+    var Script = (function (_super) {
+        __extends(Script, _super);
         function Script(world) {
             var _this = this;
+            _super.call(this);
             this.world = world;
-            this.actions = [];
             this.currentIndex = 0;
             this.isPaused = true;
             this.end = function () {
@@ -255,7 +257,7 @@ var robotcode;
             return this;
         };
         return Script;
-    })();
+    })(ActionContainer);
     robotcode.Script = Script;
     ;
 })(robotcode || (robotcode = {}));
@@ -263,6 +265,20 @@ var robotcode;
 /// <reference path="lib/tweenjs.d.ts" />
 var actions;
 (function (actions) {
+    function setCellColor(grid, x, y, color) {
+        var cell = grid.cells[x][y];
+        if (cell) {
+            cell.color = color;
+        }
+    }
+
+    function canMove(grid, x, y) {
+        if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
+            return grid.cells[x][y].color != "#000000";
+        }
+        return false;
+    }
+
     var rotate = function (robot, angle, callback) {
         if (robot.angle == angle || robot.angle == angle - 360) {
             callback();
@@ -279,7 +295,7 @@ var actions;
             var robot = world.robot;
             var grid = world.grid;
             rotate(robot, angle, function () {
-                if (!robotcode.canMove(grid, robot.x + offsetX, robot.y + offsetY)) {
+                if (!canMove(grid, robot.x + offsetX, robot.y + offsetY)) {
                     createjs.Tween.get(robot).to({ x: robot.x + offsetX * 0.2, y: robot.y + offsetY * 0.2 }, 300).to({ x: robot.x, y: robot.y }, 300).call(callback);
                 } else {
                     createjs.Tween.get(robot).to({ x: robot.x + offsetX, y: robot.y + offsetY }, 1000).call(callback);
@@ -292,9 +308,13 @@ var actions;
         return function (world, callback) {
             var robot = world.robot;
             var grid = world.grid;
-            robotcode.setCellColor(grid, robot.x, robot.y, color);
+            setCellColor(grid, robot.x, robot.y, color);
             setTimeout(callback, 500);
         };
+    };
+
+    var repeat = function (world, callback) {
+        setTimeout(callback, 500);
     };
 
     actions.up = new robotcode.Action("up", "move up");
@@ -303,6 +323,7 @@ var actions;
     actions.right = new robotcode.Action("right", "move right");
     actions.colorRed = new robotcode.Action("colorRed", "color tile in red");
     actions.colorGreen = new robotcode.Action("colorGreen", "color tile in green");
+    actions.repeat3Times = new robotcode.Action("repeat3Times", "repeat 3 times", true);
 
     robotcode.mapActions[actions.up.name] = move(0, -1, -90);
     robotcode.mapActions[actions.down.name] = move(0, 1, 90);
@@ -310,6 +331,7 @@ var actions;
     robotcode.mapActions[actions.right.name] = move(1, 0, 0);
     robotcode.mapActions[actions.colorRed.name] = color("#FF0000");
     robotcode.mapActions[actions.colorGreen.name] = color("#00FF00");
+    robotcode.mapActions[actions.repeat3Times.name] = repeat;
 })(actions || (actions = {}));
 /// <reference path="robotcode.ts" />
 /// <reference path="actions.ts" />
@@ -351,7 +373,21 @@ var robot = new robotcode.Robot();
 
 var world = new robotcode.World(robot, grid);
 var script = new robotcode.Script(world);
-var availableActions = new robotcode.AvailableActions([actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen]);
+var availableActions = new robotcode.AvailableActions([actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen, actions.repeat3Times]);
+
+Vue.directive("sortable", {
+    isEmpty: true,
+    bind: function () {
+        if (!this.el.sortable) {
+            var vm = this.vm;
+            this.el.sortable = new Sortable(this.el, this.vm.$options.sortable);
+        }
+    },
+    unbind: function () {
+        this.el.sortable.destroy();
+        delete this.el.sortable;
+    }
+});
 
 var gridView = new Vue({
     el: ".grid",
@@ -397,23 +433,14 @@ var availableActionsView = new Vue({
 
 var scriptView = new Vue({
     el: ".script",
+    sortable: {
+        draggable: ".instance",
+        ghostClass: "placeholder",
+        onUpdate: function (evt) {
+            script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
+        }
+    },
     data: {
         actions: script.actions
-    }
-});
-
-/*var placeHolder:HTMLDivElement = document.createElement("div");
-placeHolder.className = "action placeholder";
-new DomUtil.DnDContainerBehavior(
-document.querySelector(".script"),
-placeHolder, (lastIndex:number, newIndex:number) => {
-script.move(lastIndex, newIndex);
-});*/
-var sort = new Sortable(document.querySelector(".script"), {
-    // handle: ".tile__title", // Restricts sort start click/touch to the specified element
-    draggable: ".action",
-    ghostClass: "placeholder",
-    onUpdate: function (evt /**Event*/ ) {
-        script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
     }
 });

@@ -21,7 +21,15 @@
 		.action {
 			box-sizing: border-box;	
 			width: 120px;
-			height: 60px;
+			min-height: 60px;
+		}
+
+		.container {
+			box-sizing: border-box;	
+			width: 120px;
+			min-height: 60px;
+			background-color: #CCC;
+			border: 1px solid black;
 		}
 
 		.script .action {
@@ -56,9 +64,12 @@
 			background-color: #00FF00;
 		}
 
+		.repeat3Times {
+			background-color: #0000FF;
+		}
+
 		.placeHolder {
-			background-color: #999999;
-			background-image: none;
+			opacity: 0.2;
 		}
 
 		.grid {
@@ -189,15 +200,22 @@
 					v-on="click: add(action)">
 				</button>
 			</div>
-			<div class="script">
-				<button v-repeat="actionInstance: actions"
-					class="action"
-					v-attr="title: actionInstance.action.description"
-					v-class="
-						actionInstance.action.name, 
-						executing: actionInstance.executing
-					">
-				</button>
+			<div 
+				class="script" 
+				v-sortable>
+				<div 
+					v-repeat="actionInstance: actions"
+					class="instance" 
+					v-class="executing: actionInstance.executing"
+					draggable="true">
+					<div 
+						class="action"
+						v-attr="title: actionInstance.action.description"
+						v-class="actionInstance.action.name">
+					</div>
+					<div v-if="actionInstance.action.container" class="container">
+					</div>
+				</div>
 			</div>
 		</div>	
 		

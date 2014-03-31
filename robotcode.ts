@@ -27,12 +27,16 @@ module robotcode {
 	};
 
 	export class Action {
-		constructor(public name:string, public description:string){}
+		constructor(public name:string, public description:string, public container = false){}
 	};
 
 	export class ActionInstance {
 		executing:boolean = false;
 		constructor(public action:Action){}
+	};
+
+	export class ActionContainer {
+		actions:ActionInstance[] = [];
 	};
 
 	export class Control {
@@ -44,15 +48,6 @@ module robotcode {
 	};	
 
 	export var mapActions:{[key:string]:(world:robotcode.World, callback:()=>void)=>void} = {};
-
-	export function setCellColor(grid:Grid, x:number, y:number, color:string) {
-		var cell = grid.cells[x][y];
-		if (cell) {
-			cell.color = color;
-		}
-	}
-
-
 
 	export function createGrid(gridValue:GridValue):Grid {
 		var grid = new Grid();
@@ -72,22 +67,13 @@ module robotcode {
 		return grid;
 	}
 
-	export function canMove(grid:Grid, x:number, y:number):boolean {
-		if (x >= 0 && x < grid.width && y >= 0 && y < grid.height) {
-			return grid.cells[x][y].color != "#000000";
-		}
-		return false;
-	}
-
-
-
-	export class Script {
-		actions:ActionInstance[] = [];
+	export class Script extends ActionContainer {
 		currentIndex:number = 0;
 		currentActionInstance:ActionInstance;
 		isPaused:boolean = true;
 		control:Control;
 		constructor(public world:World) {
+			super();
 			this.control = new Control();
 		}
 		add(action:Action) {
