@@ -32,10 +32,13 @@ module robotcode {
 
 	export class ActionInstance {
 		executing:boolean = false;
+		parent:ActionContainer;
+		container:ActionContainer;
 		constructor(public action:Action){}
 	};
 
 	export class ActionContainer {
+		parent:ActionInstance;
 		actions:ActionInstance[] = [];
 	};
 
@@ -67,23 +70,34 @@ module robotcode {
 		return grid;
 	}
 
-	export class Script extends ActionContainer {
+	function createActionInstance(action:Action) {
+		var actionInstance = new ActionInstance(action);
+		if (action.container) {
+			actionInstance.container = new ActionContainer();
+			actionInstance.container.parent = actionInstance;
+		}
+		return actionInstance;
+	}
+
+	export class Script {
 		currentIndex:number = 0;
 		currentActionInstance:ActionInstance;
 		isPaused:boolean = true;
 		control:Control;
+		scriptContainer:ActionContainer = new ActionContainer();
 		constructor(public world:World) {
-			super();
 			this.control = new Control();
 		}
 		add(action:Action) {
-			this.actions.push(new ActionInstance(action));
+			var actionInstance = createActionInstance(action);
+			actionInstance.parent = this.scriptContainer;
+			this.scriptContainer.actions.push(actionInstance);
 			return this;
 		}
 		move(action:ActionInstance, newIndex:number) {
-			var lastIndex = this.actions.indexOf(action);
-			this.actions.splice(lastIndex, 1);
-			this.actions.splice(newIndex, 0, action);
+			var lastIndex = this.scriptContainer.actions.indexOf(action);
+			this.scriptContainer.actions.splice(lastIndex, 1);
+			this.scriptContainer.actions.splice(newIndex, 0, action);
 		}
 		play() {
 			this.isPaused = false;
@@ -103,7 +117,7 @@ module robotcode {
 		}
 		clear() {
 			this.stop();
-			this.actions.splice(0, this.actions.length);
+			this.scriptContainer.actions.splice(0, this.scriptContainer.actions.length);
 			return this;
 		}
 		private end = () => {
@@ -111,14 +125,14 @@ module robotcode {
 		}
 		private next = () => {
 			if (!this.isPaused) {
-				if (this.currentIndex >= 0 && this.currentIndex < this.actions.length) {
+				if (this.currentIndex >= 0 && this.currentIndex < this.scriptContainer.actions.length) {
 					if (this.currentActionInstance) this.currentActionInstance.executing = false;
-					this.currentActionInstance = this.actions[this.currentIndex];
+					this.currentActionInstance = this.scriptContainer.actions[this.currentIndex];
 					this.currentActionInstance.executing = true;
 					this.currentIndex++;
 					mapActions[this.currentActionInstance.action.name](
 						this.world, 
-						this.currentIndex < this.actions.length ? this.next : this.end);
+						this.currentIndex < this.scriptContainer.actions.length ? this.next : this.end);
 				} else {
 					this.end();
 				}

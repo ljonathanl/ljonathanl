@@ -84,12 +84,6 @@ var DomUtil;
     DomUtil.DnDContainerBehavior = DnDContainerBehavior;
 })(DomUtil || (DomUtil = {}));
 /// <reference path="util.ts" />
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
 var robotcode;
 (function (robotcode) {
     var Cell = (function () {
@@ -198,26 +192,34 @@ var robotcode;
     }
     robotcode.createGrid = createGrid;
 
-    var Script = (function (_super) {
-        __extends(Script, _super);
+    function createActionInstance(action) {
+        var actionInstance = new ActionInstance(action);
+        if (action.container) {
+            actionInstance.container = new ActionContainer();
+            actionInstance.container.parent = actionInstance;
+        }
+        return actionInstance;
+    }
+
+    var Script = (function () {
         function Script(world) {
             var _this = this;
-            _super.call(this);
             this.world = world;
             this.currentIndex = 0;
             this.isPaused = true;
+            this.scriptContainer = new ActionContainer();
             this.end = function () {
                 _this.stop();
             };
             this.next = function () {
                 if (!_this.isPaused) {
-                    if (_this.currentIndex >= 0 && _this.currentIndex < _this.actions.length) {
+                    if (_this.currentIndex >= 0 && _this.currentIndex < _this.scriptContainer.actions.length) {
                         if (_this.currentActionInstance)
                             _this.currentActionInstance.executing = false;
-                        _this.currentActionInstance = _this.actions[_this.currentIndex];
+                        _this.currentActionInstance = _this.scriptContainer.actions[_this.currentIndex];
                         _this.currentActionInstance.executing = true;
                         _this.currentIndex++;
-                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.world, _this.currentIndex < _this.actions.length ? _this.next : _this.end);
+                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.world, _this.currentIndex < _this.scriptContainer.actions.length ? _this.next : _this.end);
                     } else {
                         _this.end();
                     }
@@ -226,13 +228,15 @@ var robotcode;
             this.control = new Control();
         }
         Script.prototype.add = function (action) {
-            this.actions.push(new ActionInstance(action));
+            var actionInstance = createActionInstance(action);
+            actionInstance.parent = this.scriptContainer;
+            this.scriptContainer.actions.push(actionInstance);
             return this;
         };
         Script.prototype.move = function (action, newIndex) {
-            var lastIndex = this.actions.indexOf(action);
-            this.actions.splice(lastIndex, 1);
-            this.actions.splice(newIndex, 0, action);
+            var lastIndex = this.scriptContainer.actions.indexOf(action);
+            this.scriptContainer.actions.splice(lastIndex, 1);
+            this.scriptContainer.actions.splice(newIndex, 0, action);
         };
         Script.prototype.play = function () {
             this.isPaused = false;
@@ -253,11 +257,11 @@ var robotcode;
         };
         Script.prototype.clear = function () {
             this.stop();
-            this.actions.splice(0, this.actions.length);
+            this.scriptContainer.actions.splice(0, this.scriptContainer.actions.length);
             return this;
         };
         return Script;
-    })(ActionContainer);
+    })();
     robotcode.Script = Script;
     ;
 })(robotcode || (robotcode = {}));
