@@ -339,8 +339,20 @@ var actions;
     };
 
     var repeat = function (context, callback) {
-        var world = context.get("world");
-        setTimeout(callback, 500);
+        var index = context.get("index");
+        if (isNaN(index)) {
+            index = 0;
+        }
+        console.log("index: " + index);
+        var canContinue = index < 3;
+        if (canContinue) {
+            index++;
+            context.set("index", index);
+        } else {
+            context.set("index", null);
+        }
+
+        setTimeout(callback, 500, canContinue);
     };
 
     actions.up = new robotcode.Action("up", "move up");
