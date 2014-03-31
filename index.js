@@ -171,6 +171,26 @@ var robotcode;
     robotcode.AvailableActions = AvailableActions;
     ;
 
+    var Context = (function () {
+        function Context() {
+            this.map = {};
+        }
+        Context.prototype.set = function (key, value) {
+            this.map[key] = value;
+        };
+        Context.prototype.get = function (key) {
+            var map = this.map;
+            var parent = this.parent;
+            while (!(key in map) && parent) {
+                map = parent.map;
+                parent = parent.parent;
+            }
+            return map[key];
+        };
+        return Context;
+    })();
+    robotcode.Context = Context;
+
     robotcode.mapActions = {};
 
     function createGrid(gridValue) {
@@ -196,7 +216,6 @@ var robotcode;
         var actionInstance = new ActionInstance(action);
         if (action.container) {
             actionInstance.container = new ActionContainer();
-            actionInstance.container.parent = actionInstance;
         }
         return actionInstance;
     }
@@ -204,7 +223,6 @@ var robotcode;
     var Script = (function () {
         function Script(world) {
             var _this = this;
-            this.world = world;
             this.currentIndex = 0;
             this.isPaused = true;
             this.scriptContainer = new ActionContainer();
@@ -219,17 +237,18 @@ var robotcode;
                         _this.currentActionInstance = _this.scriptContainer.actions[_this.currentIndex];
                         _this.currentActionInstance.executing = true;
                         _this.currentIndex++;
-                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.world, _this.currentIndex < _this.scriptContainer.actions.length ? _this.next : _this.end);
+                        robotcode.mapActions[_this.currentActionInstance.action.name](_this.context, _this.currentIndex < _this.scriptContainer.actions.length ? _this.next : _this.end);
                     } else {
                         _this.end();
                     }
                 }
             };
+            this.context = new Context();
+            this.context.set("world", world);
             this.control = new Control();
         }
         Script.prototype.add = function (action) {
             var actionInstance = createActionInstance(action);
-            actionInstance.parent = this.scriptContainer;
             this.scriptContainer.actions.push(actionInstance);
             return this;
         };
@@ -295,7 +314,8 @@ var actions;
     };
 
     var move = function (offsetX, offsetY, angle) {
-        return function (world, callback) {
+        return function (context, callback) {
+            var world = context.get("world");
             var robot = world.robot;
             var grid = world.grid;
             rotate(robot, angle, function () {
@@ -309,7 +329,8 @@ var actions;
     };
 
     var color = function (color) {
-        return function (world, callback) {
+        return function (context, callback) {
+            var world = context.get("world");
             var robot = world.robot;
             var grid = world.grid;
             setCellColor(grid, robot.x, robot.y, color);
@@ -317,7 +338,8 @@ var actions;
         };
     };
 
-    var repeat = function (world, callback) {
+    var repeat = function (context, callback) {
+        var world = context.get("world");
         setTimeout(callback, 500);
     };
 
@@ -445,6 +467,6 @@ var scriptView = new Vue({
         }
     },
     data: {
-        actions: script.actions
+        actions: script.scriptContainer.actions
     }
 });

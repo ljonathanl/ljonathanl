@@ -111,7 +111,7 @@ var scriptView = new Vue({
 		}
 	},
 	data: {
-		actions: script.actions
+		actions: script.scriptContainer.actions
 	}
 });
 

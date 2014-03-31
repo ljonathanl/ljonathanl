@@ -28,7 +28,8 @@ module actions {
 	};
 
 	var move = function (offsetX:number, offsetY:number, angle:number) {
-		return (world:robotcode.World, callback:()=>void) => {
+		return (context:robotcode.Context, callback:()=>void) => {
+			var world:robotcode.World = context.get("world");
 			var robot = world.robot;
 			var grid = world.grid;
 			rotate(robot, angle, () => {
@@ -42,7 +43,8 @@ module actions {
 	};
 
 	var color = function (color:string) {
-		return (world:robotcode.World, callback:()=>void) => {
+		return (context:robotcode.Context, callback:()=>void) => {
+			var world:robotcode.World = context.get("world");
 			var robot = world.robot;
 			var grid = world.grid;
 			setCellColor(grid, robot.x, robot.y, color);
@@ -50,7 +52,8 @@ module actions {
 		}
 	};
 
-	var repeat = function(world:robotcode.World, callback:()=>void) {
+	var repeat = function(context:robotcode.Context, callback:()=>void) {
+		var world:robotcode.World = context.get("world");
 		setTimeout(callback, 500);
 	}
 

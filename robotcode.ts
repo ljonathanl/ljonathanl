@@ -32,13 +32,11 @@ module robotcode {
 
 	export class ActionInstance {
 		executing:boolean = false;
-		parent:ActionContainer;
 		container:ActionContainer;
 		constructor(public action:Action){}
 	};
 
 	export class ActionContainer {
-		parent:ActionInstance;
 		actions:ActionInstance[] = [];
 	};
 
@@ -48,9 +46,26 @@ module robotcode {
 
 	export class AvailableActions {
 		constructor(public actions:Action[]){}
-	};	
+	};
 
-	export var mapActions:{[key:string]:(world:robotcode.World, callback:()=>void)=>void} = {};
+	export class Context {
+		private map:{[key:string]:any} = {};
+		parent:Context;
+		set(key:string, value:any) {
+			this.map[key] = value;
+		}
+		get<T>(key:string):T {
+			var map = this.map;
+			var parent = this.parent;
+			while(!(key in map) && parent) {
+				map = parent.map;
+				parent = parent.parent;
+			}
+			return map[key];
+		} 
+	}	
+
+	export var mapActions:{[key:string]:(context:Context, callback:()=>void)=>void} = {};
 
 	export function createGrid(gridValue:GridValue):Grid {
 		var grid = new Grid();
@@ -74,7 +89,6 @@ module robotcode {
 		var actionInstance = new ActionInstance(action);
 		if (action.container) {
 			actionInstance.container = new ActionContainer();
-			actionInstance.container.parent = actionInstance;
 		}
 		return actionInstance;
 	}
@@ -84,13 +98,15 @@ module robotcode {
 		currentActionInstance:ActionInstance;
 		isPaused:boolean = true;
 		control:Control;
+		context:Context;
 		scriptContainer:ActionContainer = new ActionContainer();
-		constructor(public world:World) {
+		constructor(world:World) {
+			this.context = new Context();
+			this.context.set("world", world);
 			this.control = new Control();
 		}
 		add(action:Action) {
 			var actionInstance = createActionInstance(action);
-			actionInstance.parent = this.scriptContainer;
 			this.scriptContainer.actions.push(actionInstance);
 			return this;
 		}
@@ -131,7 +147,7 @@ module robotcode {
 					this.currentActionInstance.executing = true;
 					this.currentIndex++;
 					mapActions[this.currentActionInstance.action.name](
-						this.world, 
+						this.context, 
 						this.currentIndex < this.scriptContainer.actions.length ? this.next : this.end);
 				} else {
 					this.end();
