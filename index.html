@@ -140,6 +140,11 @@
 			right: 0;
 		}
 
+		.garbage {
+			border: 1px solid #000;
+			min-height: 50px;
+		}
+
 		</style>
 
 		<script type="text/javascript" src="lib/Event.js"></script>
@@ -171,6 +176,8 @@
 				">
 			</div>
 		</div>
+		
+
 		<div class="scriptContainer">
 			<div class="controlBoard">
 				<button 
@@ -200,9 +207,15 @@
 					v-on="click: add(action)">
 				</button>
 			</div>
+			<div class="garbage" v-sortable data-group="actions">
+			</div>
 			<div 
-				class="script" 
-				v-sortable>
+				class="script"
+				data-group="actions" 
+				v-sortable="
+					update: update,
+					remove: remove
+				">
 				<div 
 					v-repeat="actionInstance: actions"
 					class="instance" 
@@ -213,7 +226,11 @@
 						v-attr="title: actionInstance.action.description"
 						v-class="actionInstance.action.name">
 					</div>
-					<div v-if="actionInstance.action.container" class="container">
+					<div 
+						v-if="actionInstance.action.container" 
+						class="container"
+						v-sortable
+						data-group="actions">
 					</div>
 				</div>
 			</div>

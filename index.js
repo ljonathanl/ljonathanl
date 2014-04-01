@@ -253,9 +253,12 @@ var robotcode;
             return this;
         };
         Script.prototype.move = function (action, newIndex) {
+            this.remove(action);
+            this.scriptContainer.actions.splice(newIndex, 0, action);
+        };
+        Script.prototype.remove = function (action) {
             var lastIndex = this.scriptContainer.actions.indexOf(action);
             this.scriptContainer.actions.splice(lastIndex, 1);
-            this.scriptContainer.actions.splice(newIndex, 0, action);
         };
         Script.prototype.play = function () {
             this.isPaused = false;
@@ -414,16 +417,28 @@ var script = new robotcode.Script(world);
 var availableActions = new robotcode.AvailableActions([actions.up, actions.down, actions.left, actions.right, actions.colorRed, actions.colorGreen, actions.repeat3Times]);
 
 Vue.directive("sortable", {
-    isEmpty: true,
+    isFn: true,
     bind: function () {
         if (!this.el.sortable) {
             var vm = this.vm;
-            this.el.sortable = new Sortable(this.el, this.vm.$options.sortable);
+            this.el.sortable = new Sortable(this.el, { group: this.el.dataset.group });
+            this.el.sortable.countListeners = 0;
         }
     },
+    update: function (fn) {
+        var vm = this.vm;
+        this.handler = function (e) {
+            fn.call(vm, e);
+        };
+        this.el.addEventListener(this.arg, this.handler);
+    },
     unbind: function () {
-        this.el.sortable.destroy();
-        delete this.el.sortable;
+        this.el.removeEventListener(this.arg, this.handler);
+        this.el.sortable.countListeners--;
+        if (!this.el.sortable.countListeners) {
+            this.el.sortable.destroy();
+            delete this.el.sortable;
+        }
     }
 });
 
@@ -469,16 +484,27 @@ var availableActionsView = new Vue({
     }
 });
 
+var garbageView = new Vue({
+    el: ".garbage",
+    sortable: {
+        group: "actions"
+    }
+});
+
 var scriptView = new Vue({
     el: ".script",
     sortable: {
-        draggable: ".instance",
-        ghostClass: "placeholder",
-        onUpdate: function (evt) {
-            script.move(evt.item.vue_vm.$data.actionInstance, DomUtil.index(evt.item));
-        }
+        group: "actions"
     },
     data: {
         actions: script.scriptContainer.actions
+    },
+    methods: {
+        update: function (event) {
+            script.move(event.element.vue_vm.$data.actionInstance, event.index);
+        },
+        remove: function (event) {
+            script.remove(event.element.vue_vm.$data.actionInstance);
+        }
     }
 });
