@@ -5,6 +5,7 @@ module actions {
 	function setCellColor(grid:robotcode.Grid, x:number, y:number, color:string) {
 		var cell = grid.cells[x][y];
 		if (cell) {
+			
 			cell.color = color;
 		}
 	}
