@@ -1,227 +1,241 @@
-<head>
-    <title>Jeu de la vie</title>
-    <style>
-        .world {
-            border: 1px solid black;
-            display: inline;
-        }
-
-        body {
-            background-color: #222222;
-            text-align:center;
-        }
-
-        button {
-            color: #FF0000;
-            display: inline-block;
-            font-family: monospace;
-            padding: 10px;
-            margin: 10px;
-            border: 2px #FF0000 solid;
-            background-color: #222222;
-            line-height: 10px;
-        }
-
-        button:hover {
-            background-color: #442222;
-        }
-
-        #frame {
-            width: 150px;
-            text-align: right;
-        }
-
-
-        p {
-            text-align: center;
-        }
-
-
-    </style>
-</head>
-<body>
-    <p>
-        <button onclick="start()">Play</button> 
-        <button onclick="stop()">Stop</button>
-        <button onclick="reset(clean)">Reset</button>
-        <button onclick="reset(random)">Random</button>
-        <button onclick="reset(show)">Result</button>
-        <button id="frame">0</button>
-    </p>
-    <canvas id="canvas" class="world"></canvas>
-
-</body>
-<script>
-    var world = {
-        width: 300,
-        height: 300,
-        array: null,
-        view: null,
-        scale: 2,
-        colorLife: "#FF0000",
-        colorDead: "#000000",
-        timeByStep: 4,
-    }
-
-    world.array = new Array(world.width);
-    world.view = new Array(world.width);
-
-    var playing = false;
-    var frame = 0;
-    var stepNumber = 0;
-
-    function start() {
-        playing = true;
-        play();
-    }
-
-    function stop() {
-        playing = false;
-    }
-    
-    function play() {
-        if (playing) {
-            document.getElementById("frame").innerText = stepNumber;
-            if (frame % world.timeByStep == 0) {
-                step();
-                stepNumber++;
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jeu de la vie</title>
+        <style>
+            .world {
+                border: 1px solid black;
+                display: inline;
             }
-            frame++;
-            requestAnimationFrame(play);
+
+            body {
+                background-color: #222222;
+                text-align:center;
+            }
+
+            button {
+                color: #FF0000;
+                display: inline-block;
+                font-family: monospace;
+                padding: 10px;
+                margin: 10px;
+                border: 2px #FF0000 solid;
+                background-color: #222222;
+                line-height: 10px;
+            }
+
+            button:hover {
+                background-color: #442222;
+            }
+
+            #frame {
+                width: 150px;
+                text-align: right;
+            }
+
+
+            p {
+                text-align: center;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        <p>
+            <button onclick="start()">Play</button> 
+            <button onclick="stop()">Stop</button>
+            <button onclick="reset(clean)">Reset</button>
+            <button onclick="reset(randomState)">Random State</button>
+            <button onclick="reset(randomColor)">Random Color</button>
+            <button onclick="reset(show)">Result</button>
+            <button id="frame">0</button>
+        </p>
+        <canvas id="canvas" class="world"></canvas>
+
+    </body>
+    <script>
+        var world = {
+            width: 100,
+            height: 100,
+            array: null,
+            view: null,
+            scale: 8,
+            colorLife: "#FF0000",
+            colorDead: "#000000",
+            timeByStep: 4,
         }
-    }
 
-    var canvas = document.getElementById("canvas");
-    canvas.width = world.width * world.scale;
-    canvas.height = world.height * world.scale;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = world.colorDead;
+        world.array = new Array(world.width);
+        world.view = new Array(world.width);
 
-    for (let x = 0; x < world.width; x++) {
-        world.array[x] = new Array(world.height);
-        for (let y = 0; y < world.height; y++) {
-            world.array[x][y] = {state: false, color: initColor(x, y)};
-            ctx.fillRect(x * world.scale, y * world.scale, world.scale, world.scale);
+        var playing = false;
+        var frame = 0;
+        var stepNumber = 0;
+
+        function start() {
+            playing = true;
+            play();
         }
-    }
 
-    function clean(value, x, y) {
-        value.state = false;
-        value.color = initColor(x, y);
-        return value;
-    }
-
-    function show(value) {
-        value.state = true;
-        return value;
-    }
-
-    function initColor(x, y) {
-        let color = "";
-        if (x < world.width / 3) {
-            color = "3333FF";
-        } else if (x < 2 * world.height / 3) {
-            color = "BBBBBB";
-        } else {
-            color = "FF3311";
+        function stop() {
+            playing = false;
         }
         
-        return color;
-    }
-
-    function randomColor() {
-        let color = "";
-        for (let i = 0; i < 3; i++) {
-            color += toHex(Math.floor(Math.random()*255));         
+        function play() {
+            if (playing) {
+                document.getElementById("frame").innerText = stepNumber;
+                if (frame % world.timeByStep == 0) {
+                    step();
+                    stepNumber++;
+                }
+                frame++;
+                requestAnimationFrame(play);
+            }
         }
-        return color;
-    }
 
-    function random(value) {
-        value.state = Math.random() < 0.2;
-        value.color = randomColor();
-        return value;
-    }
+        var canvas = document.getElementById("canvas");
+        canvas.width = world.width * world.scale;
+        canvas.height = world.height * world.scale;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = world.colorDead;
 
-
-    function reset(action) {
-        frame = 0;
-        stepNumber = 0;
         for (let x = 0; x < world.width; x++) {
+            world.array[x] = new Array(world.height);
             for (let y = 0; y < world.height; y++) {
-                world.array[x][y] = action(world.array[x][y], x, y);
-                ctx.fillStyle = world.array[x][y].state ? "#" + world.array[x][y].color : world.colorDead;
+                world.array[x][y] = {state: false, color: initColor(x, y)};
                 ctx.fillRect(x * world.scale, y * world.scale, world.scale, world.scale);
             }
         }
-    }
 
-    function toHex(d) {
-        return  ("0"+(Number(d).toString(16))).slice(-2).toUpperCase()
-    }
+        function clean(value, x, y) {
+            value.state = false;
+            value.color = initColor(x, y);
+            return value;
+        }
+
+        function show(value) {
+            value.state = true;
+            return value;
+        }
+
+        function initColor(x, y) {
+            let color = "";
+            if (x < world.width / 3) {
+                color = "3333FF";
+            } else if (x < 2 * world.height / 3) {
+                color = "FF3333";
+            } else {
+                color = "33FF33";
+            }
+
+            // if (x < world.width / 2) {
+            //     color = "3333FF";
+            // } else {
+            //     color = "33FF33";
+            // }
+            
+            return color;
+        }
+
+        function color() {
+            let color = "";
+            for (let i = 0; i < 3; i++) {
+                color += toHex(Math.floor(Math.random()*255));         
+            }
+            return color;
+        }
+
+        function randomState(value) {
+            value.state = Math.random() < 0.2;
+            return value;
+        }
+
+        function randomColor(value) {
+            value.color = color();
+            return value;
+        }
 
 
-    function step() {
-        var lastWorldArray = JSON.parse(JSON.stringify(world.array));
-        for (let x = 0; x < world.width; x++) {
-            for (let y = 0; y < world.height; y++) {
-                let count = 0;
-                let color = "";
-                for (let i = -1; i <= 1; i++) {
-                    for (let j = -1; j <= 1; j++) {
-                        if (i != 0 || j != 0) {
-                            let c = lastWorldArray[(x + i + world.width) % world.width][(y + j + world.height) % world.height];
-                            if (c.state) {
-                                count++;
-                                if (count <= 3) {
-                                    color += Math.random() < 0.001 ? toHex(Math.floor(Math.random()*255)) : c.color.substr(2 * (count - 1), 2);
-                                }
-                            } 
-                        }
-                    }
-                }
-                world.array[x][y].state = (count == 3) || (lastWorldArray[x][y].state && count == 2);
-                if (world.array[x][y].state != lastWorldArray[x][y].state) {
-                    if (count == 3) {
-                        world.array[x][y].color = color; 
-                    }  
+        function reset(action) {
+            frame = 0;
+            stepNumber = 0;
+            for (let x = 0; x < world.width; x++) {
+                for (let y = 0; y < world.height; y++) {
+                    world.array[x][y] = action(world.array[x][y], x, y);
                     ctx.fillStyle = world.array[x][y].state ? "#" + world.array[x][y].color : world.colorDead;
                     ctx.fillRect(x * world.scale, y * world.scale, world.scale, world.scale);
                 }
             }
         }
-    }
 
-
-    var isDrawing = false;
-    var state;
-
-    function draw(evt, fill) {
-        var rect = canvas.getBoundingClientRect();
-        var x = Math.floor((evt.clientX - rect.left) / world.scale);
-        var y = Math.floor((evt.clientY - rect.top) / world.scale);
-        if (fill) {
-            state = !world.array[x][y].state;
+        function toHex(d) {
+            return  ("0"+(Number(d).toString(16))).slice(-2).toUpperCase()
         }
-        world.array[x][y].state = state;
-        ctx.fillStyle = state ? "#" + world.array[x][y].color : world.colorDead;
-        ctx.fillRect(x * world.scale, y * world.scale, world.scale, world.scale);
-    }
 
-    canvas.onmousemove = function(evt) {
-        if (isDrawing) {
-            draw(evt, false);
+
+        function step() {
+            var lastWorldArray = JSON.parse(JSON.stringify(world.array));
+            for (let x = 0; x < world.width; x++) {
+                for (let y = 0; y < world.height; y++) {
+                    let count = 0;
+                    let color = "";
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            if (i != 0 || j != 0) {
+                                let c = lastWorldArray[(x + i + world.width) % world.width][(y + j + world.height) % world.height];
+                                if (c.state) {
+                                    count++;
+                                    if (count <= 3) {
+                                        color += /*Math.random() < 0.001 ? toHex(Math.floor(Math.random()*255)) : */ c.color.substr(2 * (count - 1), 2);
+                                    }
+                                } 
+                            }
+                        }
+                    }
+                    world.array[x][y].state = (count == 3) || (lastWorldArray[x][y].state && count == 2);
+                    if (world.array[x][y].state != lastWorldArray[x][y].state) {
+                        if (count == 3) {
+                            world.array[x][y].color = color; 
+                        }  
+                        ctx.fillStyle = world.array[x][y].state ? "#" + world.array[x][y].color : world.colorDead;
+                        ctx.fillRect(x * world.scale, y * world.scale, world.scale, world.scale);
+                    }
+                }
+            }
         }
-    };
-
-    canvas.onmousedown = function(evt) {
-        isDrawing = true;
-        draw(evt, true);
-    };
-
-    canvas.onmouseup = function() {
-        isDrawing = false;
-    };
 
 
-</script>
+        var isDrawing = false;
+        var state;
+
+        function draw(evt, fill) {
+            var rect = canvas.getBoundingClientRect();
+            var x = Math.floor((evt.clientX - rect.left) / world.scale);
+            var y = Math.floor((evt.clientY - rect.top) / world.scale);
+            if (fill) {
+                state = !world.array[x][y].state;
+            }
+            world.array[x][y].state = state;
+            ctx.fillStyle = state ? "#" + world.array[x][y].color : world.colorDead;
+            ctx.fillRect(x * world.scale, y * world.scale, world.scale, world.scale);
+        }
+
+        canvas.onmousemove = function(evt) {
+            if (isDrawing) {
+                draw(evt, false);
+            }
+        };
+
+        canvas.onmousedown = function(evt) {
+            isDrawing = true;
+            draw(evt, true);
+        };
+
+        canvas.onmouseup = function() {
+            isDrawing = false;
+        };
+
+
+    </script>
+</html>    
